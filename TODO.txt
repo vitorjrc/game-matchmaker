@@ -1,0 +1,8 @@
+-Criar classe Jogo
+	-> Tem 10 Players (classificação, lista de jogos, etc.)
+-Atribuir jogo a Worker (guardar em arraylist que aquele jogo foi iniciado)
+-Sempre que um novo cliente se liga, verifica-se a classificação e, consultando o arraylist de jogos a correr, liga-se o worker novo com o jogo existente ou com um novo
+	-> Se for criado jogo novo, tem que ser criado antes de meter no worker
+	-> Se for metido o cliente num jogo já existente (ou seja, que está à espera de 10 indivíduos para jogar), então eles vão consultar e ser inseridos no jogo através de métodos que vão consultar em modo synchronized o Jogo (definir estes metodos na classe)
+	-> Se num de jogadores for 10, servidor envia reply a dizer que o jogo vai ser iniciado e clientes metem "OK", e fecham conexão.
+	-> Quando é recebido um "OK", o server tem que dar update ao estado daquele jogo, dando-o como concluido e removendo-o da lista de jogos em espera
