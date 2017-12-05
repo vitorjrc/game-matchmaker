@@ -18,6 +18,7 @@ public class User {
     public User(String user, String pass) {
         username = user;
         password = pass;
+        ranking = 0;
     }
     
     public String getPassword() {

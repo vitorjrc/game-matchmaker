@@ -18,6 +18,7 @@ public class Play {
     // O arraylist guarda o user e o boneco que o mesmo escolheu
     private Map<User,String> team1 = null;
     private Map<User,String> team2 = null;
+    // talvez insira array para guarder selecionadas
     private int ranking;
     
     public Play(int rank) {
