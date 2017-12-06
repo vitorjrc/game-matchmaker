@@ -35,6 +35,14 @@ public class Client {
 			String userInput; 	//string para ler o input do utilizador
 			String response;	//string para ler a resposta do servidor
 			System.out.print("$ ");
+                        
+                        // Receber mensagem de boas vindas
+                        while ((response = in.readLine()) != null) {
+                            System.out.println(response);
+                            if (response.equals("3. Sair")) break;
+                        }
+			System.out.print("\n$ ");
+                        
 			while((userInput = systemIn.readLine())!=null && !userInput.equals("quit")){
 				out.write(userInput);
 				out.newLine();

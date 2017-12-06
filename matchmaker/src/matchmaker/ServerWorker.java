@@ -26,6 +26,12 @@ public void run() {
 		//criar canais de leitura/escrita no socket
 		BufferedReader in=new BufferedReader(new InputStreamReader(socket.getInputStream()));
 		BufferedWriter out = new BufferedWriter(new OutputStreamWriter(socket.getOutputStream()));
+                
+                // Boas vindas e menu de entrada.
+                out.write("BEM-VINDO AO MELHOR JOGO DE SEMPRE!\n1. Iniciar sessao\n2. Registar-se\n3. Sair");
+                out.newLine();
+		out.flush();
+                System.out.println("Worker-"+id+" sended Welcome Message.");
 
 		String line;	//string para ler mensagens do cliente
 		while((line = in.readLine()) != null){
