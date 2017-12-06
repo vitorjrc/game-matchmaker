@@ -3,12 +3,14 @@ package matchmaker;
 import java.io.IOException;
 import java.net.ServerSocket;
 import java.net.Socket;
+import java.util.HashMap;
 
 
 public class Server {
 
 	private ServerSocket servsocket;
 	private int porto;
+        private static HashMap<String, User> users = new HashMap<String, User>();
 
 	public Server (int porto){
 		this.porto = porto;
@@ -25,7 +27,7 @@ public class Server {
 				Socket socket = servsocket.accept();
 				System.out.println("ServerMain > Connection received! Create worker thread to handle connection.");
 
-				ServerWorker sw = new ServerWorker(socket, workerCounter++);
+				ServerWorker sw = new ServerWorker(socket, workerCounter++, users);
 				new Thread(sw).start();
 			}
 		} catch (IOException e) {
@@ -35,6 +37,12 @@ public class Server {
 
 	public static void main(String[] args) {
 		Server s = new Server(12345);
+                
+                // Testar users
+                User user1 = new User("shameat","123456");
+                users.put("shameat", user1);
+                //
+                
 		s.startServer();
 	}
 }

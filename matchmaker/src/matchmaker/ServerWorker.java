@@ -6,16 +6,19 @@ import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.OutputStreamWriter;
 import java.net.Socket;
+import java.util.HashMap;
 
 
 public class ServerWorker implements Runnable{
 
 	private Socket socket;
 	private int id;
+        private HashMap<String, User> users = null;
 	
-	public ServerWorker (Socket socket, int id){
+	public ServerWorker (Socket socket, int id, HashMap<String, User> users){
 		this.socket = socket;		
 		this.id = id;
+                this.users = users; // Passamos direto, fica com o acesso aberto ao array de utilizadores do servidor
 	}
 	
 
@@ -24,22 +27,99 @@ public void run() {
 	
 	try{
 		//criar canais de leitura/escrita no socket
-		BufferedReader in=new BufferedReader(new InputStreamReader(socket.getInputStream()));
+		BufferedReader in = new BufferedReader(new InputStreamReader(socket.getInputStream()));
 		BufferedWriter out = new BufferedWriter(new OutputStreamWriter(socket.getOutputStream()));
+                String line;	//string para ler mensagens do cliente
+                String username;
+                String password;
                 
                 // Boas vindas e menu de entrada.
                 out.write("BEM-VINDO AO MELHOR JOGO DE SEMPRE!\n1. Iniciar sessao\n2. Registar-se\n3. Sair");
                 out.newLine();
 		out.flush();
                 System.out.println("Worker-"+id+" sended Welcome Message.");
+                
+                // Receber e tratar resposta do menu de entrada
+                while((line = in.readLine()) != null) {
+                    System.out.println("\nWorker-"+id+" > Received message from client: " + line);
+                    
+                        // Recebe pedido de inicio de sessao
+			if (line.equals("1")) {
+                            // Pede que insira username
+                            out.write("Insira o seu username.");
+                            out.newLine();
+                            out.flush();
+                            System.out.println("Worker-"+id+" asked for USERNAME.");
+                            // Se existir pede password
+                            if (((username = in.readLine()) != null) && users.containsKey(username)) {
+                                out.write("Insira a sua password.");
+                                out.newLine();
+                                out.flush();
+                                System.out.println("Worker-"+id+" asked for PASSWORD.");
+                                // Confirma password e informa entrada
+                                if (((password = in.readLine()) != null) && password.equals(users.get(username).getPassword())) {
+                                    out.write("Logando...");
+                                    out.newLine();
+                                    out.flush();
+                                    System.out.println("Worker-"+id+" accepted user.");
+                                    break; // ja esta feita a parte do menu de entrada
+                                }
+                            }
+                        }
+                        
+                        // Recebe pedido de inscricao
+			if (line.equals("2")) {
+                            // Pede que insira username
+                            out.write("Insira o username da sua nova conta.");
+                            out.newLine();
+                            out.flush();
+                            System.out.println("Worker-"+id+" asked for NEW USERNAME.");
+                            // Se estiver disponivel, pede password
+                            if (((username = in.readLine()) != null) && !users.containsKey(username)) {
+                                out.write("Insira a sua password.");
+                                out.newLine();
+                                out.flush();
+                                System.out.println("Worker-"+id+" asked for NEW PASSWORD.");
+                                // Confirma password e informa entrada
+                                if (((password = in.readLine()) != null)) {
+                                    User newUser = new User(username, password);
+                                    users.put(username, newUser);
+                                    out.write("Username: " + username + " Password: " + password + " criado.");
+                                    out.newLine();
+                                    out.flush();
+                                    System.out.println("Worker-"+id+" created NEW USER.");
+                                    break; // ja esta feita a parte do menu de entrada
+                                }
+                            }
+                        }
+                        
+                        // Recebe pedido de saida
+                        if (line.equals("3")) {
+                            // Pede que insira "quit"
+                            out.write("Escreva 'quit' para sair.");
+                            out.newLine();
+                            out.flush();
+                            System.out.println("Worker-"+id+" asked for QUIT COMMAND.");
+                            break; // ja esta feita a parte do menu de entrada
+                        }
+                        
+                        // Caso algo falhou, mostra menu de novo
+                        else {
+                            out.write("Ups... 1. Iniciar sessao || 2. Registar utilizador || 3. Sair");
+                            out.newLine();
+                            out.flush();
+                            System.out.println("Worker-"+id+" showed MENU.");
+                        }
+                        
+		}
 
-		String line;	//string para ler mensagens do cliente
+		
 		while((line = in.readLine()) != null){
-			System.out.println("\nWorker-"+id+" > Received message from client: " + line);
-			out.write(line);
-			out.newLine();
-			out.flush();
-			System.out.println("Worker-"+id+" > Reply with: " + line);
+                    System.out.println("\nWorker-"+id+" > Received message from client: " + line);
+                    out.write(line);
+                    out.newLine();
+                    out.flush();
+                    System.out.println("Worker-"+id+" > Reply with: " + line);
 		}
 		
 		System.out.println("\nWorker-"+id+" > Client disconnected. Connection is closed.\n");
