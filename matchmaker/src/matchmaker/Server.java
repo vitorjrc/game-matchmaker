@@ -4,12 +4,14 @@ import java.io.IOException;
 import java.net.ServerSocket;
 import java.net.Socket;
 import java.util.HashMap;
+import java.util.concurrent.ConcurrentHashMap;
 
 public class Server {
 
     private ServerSocket servsocket;
     private int porto;
-    private static HashMap<String, User> users = new HashMap<String, User>();
+    private static ConcurrentHashMap<String, User> users = new ConcurrentHashMap<String, User>();
+    private static HashMap<Integer, Play> games = new HashMap<Integer, Play>(); // Integer é o rank do jogo
 
     public Server(int porto) {
         this.porto = porto;

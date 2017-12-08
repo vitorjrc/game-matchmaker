@@ -6,16 +6,16 @@ import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.OutputStreamWriter;
 import java.net.Socket;
-import java.util.HashMap;
+import java.util.concurrent.ConcurrentHashMap;
 
 public class ServerWorker implements Runnable {
 
     private Socket socket;
     private int id;
-    private HashMap<String, User> users = null;
+    private ConcurrentHashMap<String, User> users = null;
     private User loggedUser = null;
 
-    public ServerWorker(Socket socket, int id, HashMap<String, User> users) {
+    public ServerWorker(Socket socket, int id, ConcurrentHashMap<String, User> users) {
         this.socket = socket;
         this.id = id;
         this.users = users; // Passamos direto, fica com o acesso aberto ao array de utilizadores do servidor
