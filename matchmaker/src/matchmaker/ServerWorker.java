@@ -13,6 +13,7 @@ public class ServerWorker implements Runnable {
     private Socket socket;
     private int id;
     private HashMap<String, User> users = null;
+    private User loggedUser = null;
 
     public ServerWorker(Socket socket, int id, HashMap<String, User> users) {
         this.socket = socket;
@@ -31,6 +32,7 @@ public class ServerWorker implements Runnable {
             String username;
             String password;
 
+            // -----------------------------------------------------------------
             // Boas vindas e menu de entrada.
             out.write("BEM-VINDO AO MELHOR JOGO DE SEMPRE!\n1. Iniciar sessao\n2. Registar-se\n3. Sair");
             out.newLine();
@@ -82,6 +84,8 @@ public class ServerWorker implements Runnable {
             }
             // FIM MENU ENTRADA
 
+            // -----------------------------------------------------------------
+            // Escolher jogo para o utilizador atual
             while ((line = in.readLine()) != null) {
                 System.out.println("\nWorker-" + id + " > Received message from client: " + line);
                 out.write(line);
@@ -127,6 +131,7 @@ public class ServerWorker implements Runnable {
                     out.write("Logando...");
                     out.newLine();
                     out.flush();
+                    loggedUser = users.get(username); // User fica logado na thread
                     System.out.println("Worker-" + id + " accepted user.");
 
                     return true;
