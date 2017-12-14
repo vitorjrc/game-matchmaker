@@ -11,7 +11,6 @@ public class Server {
     private ServerSocket servsocket;
     private int porto;
     private static ConcurrentHashMap<String, User> users = new ConcurrentHashMap<String, User>();
-    private static HashMap<Integer, Play> games = new HashMap<Integer, Play>(); // Integer é o rank do jogo
 
     public Server(int porto) {
         this.porto = porto;
