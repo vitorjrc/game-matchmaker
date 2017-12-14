@@ -11,6 +11,7 @@ public class Server {
     private ServerSocket servsocket;
     private int porto;
     private static ConcurrentHashMap<String, User> users = new ConcurrentHashMap<String, User>();
+    private Game overwatch = new Game();
 
     public Server(int porto) {
         this.porto = porto;
@@ -27,7 +28,7 @@ public class Server {
                 Socket socket = servsocket.accept();
                 System.out.println("ServerMain > Connection received! Create worker thread to handle connection.");
 
-                ServerWorker sw = new ServerWorker(socket, workerCounter++, users);
+                ServerWorker sw = new ServerWorker(socket, workerCounter++, users, overwatch);
                 new Thread(sw).start();
             }
         } catch (IOException e) {

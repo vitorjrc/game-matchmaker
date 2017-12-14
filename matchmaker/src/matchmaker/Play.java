@@ -8,23 +8,34 @@ package matchmaker;
 import java.util.HashMap;
 import java.util.Map;
 
-
 /**
  *
  * @author Vitor Castro
  */
+// NAO ESTA A PERMITIR CONCORRENCIA AINDA
 public class Play {
-    
+
     // O arraylist guarda o user e o boneco que o mesmo escolheu
-    private Map<User,String> team1 = null;
-    private Map<User,String> team2 = null;
+    private Map<User, String> team1 = null;
+    private Map<User, String> team2 = null;
     // talvez insira array para guarder selecionadas
     private int ranking;
-    
+
     public Play(int rank) {
         team1 = new HashMap<>();
         team2 = new HashMap<>();
         ranking = rank;
     }
-    
+
+    public int getRanking() {
+
+        return ranking;
+    }
+
+    /* disabled for testing purposes
+    public void addPlayer(User player) {
+
+
+    }
+     */
 }

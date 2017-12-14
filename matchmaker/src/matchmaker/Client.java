@@ -45,6 +45,26 @@ public class Client {
             }
             System.out.print("\n$ ");
 
+            // Menu inicial
+            while ((userInput = systemIn.readLine()) != null && !userInput.equals("quit") && !response.equals("ENTER para continuar.")) {
+                out.write(userInput);
+                out.newLine();
+                out.flush();
+
+                response = in.readLine();
+                System.out.println("> Received response from server: " + response);
+            }
+
+            // Receber informações da play em que entrou
+            while ((response = in.readLine()) != null) {
+                System.out.println(response);
+                if (response.equals("Prepare-se para escolher o seu campeão!")) {
+                    break;
+                }
+            }
+            System.out.print("\n$ ");
+
+            // Falar com o servidor para escolher personagem
             while ((userInput = systemIn.readLine()) != null && !userInput.equals("quit")) {
                 out.write(userInput);
                 out.newLine();

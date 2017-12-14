@@ -13,12 +13,15 @@ public class ServerWorker implements Runnable {
     private Socket socket;
     private int id;
     private ConcurrentHashMap<String, User> users = null;
+    private Game game = null; // podia ser lol, FM, cs:go
     private User loggedUser = null;
+    private Play activePlay = null;
 
-    public ServerWorker(Socket socket, int id, ConcurrentHashMap<String, User> users) {
+    public ServerWorker(Socket socket, int id, ConcurrentHashMap<String, User> users, Game game) {
         this.socket = socket;
         this.id = id;
         this.users = users; // Passamos direto, fica com o acesso aberto ao array de utilizadores do servidor
+        this.game = game;
     }
 
     @Override
@@ -85,7 +88,21 @@ public class ServerWorker implements Runnable {
             // FIM MENU ENTRADA
 
             // -----------------------------------------------------------------
-            // Escolher jogo para o utilizador atual
+            // Inserir o jogador numa partida
+            arrangePlay(loggedUser);
+
+            // Informar login para o username X, jogo em que entrou e dizer para se preparar para escolher
+            out.write("Login efetuado, " + loggedUser.getUsername() + ".");
+            out.newLine();
+            out.write("Entrou numa partida de ranking: " + Integer.toString(activePlay.getRanking()) + ".");
+            out.newLine();
+            out.write("Prepare-se para escolher o seu campeão!");
+            out.newLine();
+            out.flush();
+            System.out.println("\nWorker-" + id + " > Informed login to user: " + loggedUser.getUsername()
+                    + ", playing in game ranked: " + Integer.toString(activePlay.getRanking()));
+
+            // Fornecer ao jogador os campeoes disponiveis e escolher
             while ((line = in.readLine()) != null) {
                 System.out.println("\nWorker-" + id + " > Received message from client: " + line);
                 out.write(line);
@@ -128,7 +145,7 @@ public class ServerWorker implements Runnable {
                 // Confirma password e informa entrada
                 if (((password = in.readLine()) != null) && password.equals(users.get(username).getPassword())) {
                     System.out.println("\nWorker-" + id + " > Received message from client: " + password);
-                    out.write("Logando...");
+                    out.write("ENTER para continuar.");
                     out.newLine();
                     out.flush();
                     loggedUser = users.get(username); // User fica logado na thread
@@ -191,6 +208,27 @@ public class ServerWorker implements Runnable {
             e.printStackTrace();
         }
 
+    }
+
+    private void arrangePlay(User player) {
+
+        int rank = game.isPlayStarted(player.getRanking());
+
+        // isPlayStarted retorna -1 caso não haja uma play disponível, ou o valor do rank da play disponível
+        if (rank >= 0) {
+
+            activePlay = game.getPlay(rank);
+            System.out.println("Worker-" + id + " made ACTIVE PLAY an EXHISTANT one.");
+        } // criar novo jogo com ranking do primeiro jogador e adicionar o jogador à play. Fazer o jogo available para outros jogadores. activePlay é essa.
+        else {
+
+            activePlay = new Play(player.getRanking());
+            /* disabled for testing purposes
+            activePlay.addPlayer(loggedUser);
+             */
+            game.launchNewPlay(activePlay.getRanking(), activePlay);
+            System.out.println("Worker-" + id + " created a NEW PLAY.");
+        }
     }
 
 }
