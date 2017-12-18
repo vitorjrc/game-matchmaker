@@ -16,10 +16,13 @@ public class Game {
 
     // tem os jogos atualmente ativos, por ranking. faz-se remove quando é finalizado
     private static ConcurrentHashMap<Integer, Play> plays = null;
+    // tem os jogos que estão em seleçao ou terminados
+    private static ConcurrentHashMap<Integer, Play> closedPlays = null;
 
     public Game() {
 
         plays = new ConcurrentHashMap<Integer, Play>(); // Integer é o rank do jogo
+        closedPlays = new ConcurrentHashMap<Integer, Play>();
     }
 
     /*
