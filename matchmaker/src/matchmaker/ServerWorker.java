@@ -212,37 +212,31 @@ public class ServerWorker implements Runnable {
 
     private void arrangePlay(User player) {
 
-        int rank = game.isPlayStarted(player.getRanking());
+        int rank = game.isPlayAvailable(player.getRanking());
 
         // isPlayStarted retorna -1 caso não haja uma play disponível, ou o valor do rank da play disponível
         if (rank >= 0) {
 
             activePlay = game.getPlay(rank);
             // disabled for testing purposes - add that player to the game selectec
-            activePlay.addPlayer(loggedUser);
+            activePlay.addPlayer(loggedUser); // ja da o update do numero de jogadores
             // check if the teams are full and the game ready to start
-            /*
             if (activePlay.isPlayFull()) {
 
-                passar active play para o array de jogos iniciados e retira-lo do map "plays"
-
-            } else {
-
-                continue;
+                game.startPlay(activePlay); // tira a play actual das availables e dá como iniciada a mesma
 
             }
-
-             */
             System.out.println("Worker-" + id + " made ACTIVE PLAY an EXHISTANT one.");
+            System.out.println("Worker-" + id + " num of players: " + activePlay.getPlayers());
         } // criar novo jogo com ranking do primeiro jogador e adicionar o jogador à play. Fazer o jogo available para outros jogadores. activePlay é essa.
         else {
 
             activePlay = new Play(player.getRanking());
             // disabled for testing purposes
             activePlay.addPlayer(loggedUser);
-
             game.launchNewPlay(activePlay.getRanking(), activePlay);
             System.out.println("Worker-" + id + " created a NEW PLAY.");
+            System.out.println("Worker-" + id + " num of players: " + activePlay.getPlayers());
         }
     }
 

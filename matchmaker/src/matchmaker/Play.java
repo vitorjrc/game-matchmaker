@@ -20,13 +20,13 @@ public class Play {
     private Map<User, String> team2 = null;
     // talvez insira array para guarder selecionadas
     private int ranking;
-    private boolean full;
+    private int players;
 
     public Play(int rank) {
         team1 = new HashMap<>();
         team2 = new HashMap<>();
         ranking = rank;
-        full = false;
+        players = 0;
     }
 
     public int getRanking() {
@@ -41,21 +41,24 @@ public class Play {
 
             team1.put(player, "NENHUM");
 
-        } else if (team2.size() < 5) {
+        } else {
 
             team2.put(player, "NENHUM");
 
-        } else {
-
-            full = true;
-
         }
+
+        players++;
 
     }
 
     public boolean isPlayFull() {
 
-        return full;
+        return (players >= 10);
+    }
+
+    public int getPlayers() {
+
+        return players;
     }
 
 }

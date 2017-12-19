@@ -36,7 +36,7 @@ public class Game {
     /*
     Devolve o rank da play em que o jogador pode entrar. -1 caso seja necessário criar um novo jogo
      */
-    public int isPlayStarted(int rank) {
+    public int isPlayAvailable(int rank) {
 
         if (plays.containsKey(rank)) {
             return rank;
@@ -47,6 +47,16 @@ public class Game {
         } else {
             return (-1);
         }
+    }
+
+    /*
+    Remove o jogo dos jogos em espera e mete-o nos jogos a jogar (inclui o processo de seleção)
+     */
+    public void startPlay(Play play) {
+
+        closedPlays.put(play.getRanking(), play);
+        plays.remove(play.getRanking());
+
     }
 
     /*
