@@ -64,6 +64,10 @@ public class Client {
             }
             System.out.print("\n$ ");
 
+            //Criar listener thread para receber mensagens de outros utilizadores
+            Thread listener = new Thread(new ClientListener(in));
+            listener.start();
+
             // Falar com o servidor para escolher personagem
             while ((userInput = systemIn.readLine()) != null && !userInput.equals("quit")) {
                 out.write(userInput);

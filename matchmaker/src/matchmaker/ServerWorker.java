@@ -88,8 +88,8 @@ public class ServerWorker implements Runnable {
             // FIM MENU ENTRADA
 
             // -----------------------------------------------------------------
-            // Inserir o jogador numa partida
-            arrangePlay(loggedUser);
+            // Inserir o jogador numa partida e dar a conhecer o seu BufferedWriter para as mensagens em team no lobby de seleção
+            arrangePlay(loggedUser, out);
 
             // Informar login para o username X, jogo em que entrou e dizer para se preparar para escolher
             out.write("Login efetuado, " + loggedUser.getUsername() + ".");
@@ -101,8 +101,17 @@ public class ServerWorker implements Runnable {
             out.flush();
             System.out.println("\nWorker-" + id + " > Informed login to user: " + loggedUser.getUsername()
                     + ", playing in game ranked: " + Integer.toString(activePlay.getRanking()));
+            // FIM DE PREPARAÇÃO DE PARTIDA NOVA
 
-            // Fornecer ao jogador os campeoes disponiveis e escolher
+            // -----------------------------------------------------------------
+            // Escolher campeão
+            //receber mensagens do utilizador e difundir pelos restantes utilizadores
+            String msg = null;
+            while ((msg = in.readLine()) != null) {
+                activePlay.multicast(loggedUser.getUsername(), msg);
+            }
+
+            // codigo standard usado pelos profs
             while ((line = in.readLine()) != null) {
                 System.out.println("\nWorker-" + id + " > Received message from client: " + line);
                 out.write(line);
@@ -110,6 +119,7 @@ public class ServerWorker implements Runnable {
                 out.flush();
                 System.out.println("Worker-" + id + " > Reply with: " + line);
             }
+            // FIM DE ESCOLHA DE JOGADORES
 
             System.out.println("\nWorker-" + id + " > Client disconnected. Connection is closed.\n");
 
@@ -210,7 +220,7 @@ public class ServerWorker implements Runnable {
 
     }
 
-    private void arrangePlay(User player) {
+    private void arrangePlay(User player, BufferedWriter out) {
 
         int rank = game.isPlayAvailable(player.getRanking());
 
@@ -220,10 +230,12 @@ public class ServerWorker implements Runnable {
             activePlay = game.getPlay(rank);
             // disabled for testing purposes - add that player to the game selectec
             activePlay.addPlayer(loggedUser); // ja da o update do numero de jogadores
-            // check if the teams are full and the game ready to start
+            activePlay.registerClientOut(loggedUser.getUsername(), out); // para que depois seja possível obter o BufferedWriter para comunicação
+            // check if the teams are full and the game ready to start (in case this is the last player, which is the one that will launch the choice menu)
             if (activePlay.isPlayFull()) {
 
                 game.startPlay(activePlay); // tira a play actual das availables e dá como iniciada a mesma
+                activePlay.launchChampionSelection(); // vai lançar nova thread só para tratar disto
 
             }
             System.out.println("Worker-" + id + " made ACTIVE PLAY an EXHISTANT one.");
