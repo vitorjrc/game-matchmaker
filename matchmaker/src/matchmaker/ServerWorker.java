@@ -96,7 +96,7 @@ public class ServerWorker implements Runnable {
             out.newLine();
             out.write("Entrou numa partida de ranking: " + Integer.toString(activePlay.getRanking()) + ".");
             out.newLine();
-            out.write("Prepare-se para escolher o seu campeão!");
+            out.write("Insira o número do campeão que deseja (de 1 a 30)!");
             out.newLine();
             out.flush();
             System.out.println("\nWorker-" + id + " > Informed login to user: " + loggedUser.getUsername()
@@ -106,16 +106,33 @@ public class ServerWorker implements Runnable {
             // -----------------------------------------------------------------
             // Escolher campeão
             //receber mensagens do utilizador e difundir pelos restantes utilizadores
-            /*
-            String msg = null;
-            while ((msg = in.readLine()) != null) {
-                activePlay.multicast(loggedUser.getUsername(), msg);
-            }
-             */
-            // codigo teste broadcast
             while ((line = in.readLine()) != null) {
                 System.out.println("\nWorker-" + id + " > Received message from client: " + line);
-                activePlay.multicast(loggedUser, line);
+                if ((Integer.parseInt(line) > 0) && (Integer.parseInt(line) < 31)) {
+                    if (activePlay.chooseChampion(loggedUser, line)) { // já mete o campeão associado ao player
+                        activePlay.teamcast(loggedUser, line); // diz à equipa que aquele jogador escolheu aquele campeao
+                        System.out.println("Worker-" + id + " > Player " + loggedUser.getUsername() + " choosed champion: " + line);
+                        System.out.println("Worker-" + id + " > Teamcasted with: " + line);
+                        out.write("Campeão selecionado! Caso queira mudar, basta inserir outro número.");
+                        out.newLine();
+                        out.flush();
+                    } else {
+                        System.out.println("\nWorker-" + id + " > Informed UNAVAILABLE CHAMPION to: " + loggedUser.getUsername());
+                        out.write("Campeão indisponível! Escolha outro.");
+                        out.newLine();
+                        out.flush();
+                    }
+                } else {
+                    System.out.println("\nWorker-" + id + " > Informed INVALID CHAMPION to: " + loggedUser.getUsername());
+                    out.write("Esse campeão ainda não nasceu! Escolha outro.");
+                    out.newLine();
+                    out.flush();
+                }
+            }
+
+            while ((line = in.readLine()) != null) {
+                System.out.println("\nWorker-" + id + " > Received message from client: " + line);
+                activePlay.teamcast(loggedUser, line);
                 System.out.println("Worker-" + id + " > Broadcasted with: " + line);
             }
 
@@ -243,7 +260,6 @@ public class ServerWorker implements Runnable {
             if (activePlay.isPlayFull()) {
 
                 game.startPlay(activePlay); // tira a play actual das availables e dá como iniciada a mesma
-                activePlay.launchChampionSelection(); // vai lançar nova thread só para tratar disto
 
             }
             System.out.println("Worker-" + id + " made ACTIVE PLAY an EXHISTANT one.");

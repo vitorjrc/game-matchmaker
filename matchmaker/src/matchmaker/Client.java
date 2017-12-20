@@ -58,32 +58,29 @@ public class Client {
             // Receber informações da play em que entrou
             while ((response = in.readLine()) != null) {
                 System.out.println(response);
-                if (response.equals("Prepare-se para escolher o seu campeão!")) {
+                if (response.equals("Insira o número do campeão que deseja (de 1 a 30)!")) {
                     break;
                 }
             }
             System.out.print("\n$ ");
 
-            //Criar listener thread para receber mensagens de outros utilizadores
+            //Criar listener thread para receber mensagens relativas a outros utilizadores
             Thread listener = new Thread(new ClientListener(in));
             listener.start();
 
+            /*
             // Receber as mensagens do utilizador para o chat
             while ((userInput = systemIn.readLine()) != null && !userInput.equals("quit")) {
                 out.write(userInput);
                 out.newLine();
                 out.flush();
             }
-
+             */
             // Falar com o servidor para escolher personagem
             while ((userInput = systemIn.readLine()) != null && !userInput.equals("quit")) {
                 out.write(userInput);
                 out.newLine();
                 out.flush();
-
-                response = in.readLine();
-                System.out.println("> Received response from server: " + response);
-                System.out.print("\n$ ");
             }
 
             //fechar sockets
