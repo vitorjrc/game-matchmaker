@@ -108,7 +108,7 @@ public class ServerWorker implements Runnable {
             //receber mensagens do utilizador e difundir pelos restantes utilizadores
             while ((line = in.readLine()) != null) {
                 System.out.println("\nWorker-" + id + " > Received message from client: " + line);
-                if ((Integer.parseInt(line) > 0) && (Integer.parseInt(line) < 31)) {
+                if (isNumber(line) && (Integer.parseInt(line) > 0) && (Integer.parseInt(line) < 31)) {
                     if (activePlay.chooseChampion(loggedUser, line)) { // já mete o campeão associado ao player
                         activePlay.teamcast(loggedUser, line); // diz à equipa que aquele jogador escolheu aquele campeao
                         System.out.println("Worker-" + id + " > Player " + loggedUser.getUsername() + " choosed champion: " + line);
@@ -130,12 +130,13 @@ public class ServerWorker implements Runnable {
                 }
             }
 
+            /* CODIGO PARA CHAT
             while ((line = in.readLine()) != null) {
                 System.out.println("\nWorker-" + id + " > Received message from client: " + line);
                 activePlay.teamcast(loggedUser, line);
                 System.out.println("Worker-" + id + " > Broadcasted with: " + line);
             }
-
+             */
             // codigo standard usado pelos profs
             while ((line = in.readLine()) != null) {
                 System.out.println("\nWorker-" + id + " > Received message from client: " + line);
@@ -275,6 +276,19 @@ public class ServerWorker implements Runnable {
             System.out.println("Worker-" + id + " created a NEW PLAY.");
             System.out.println("Worker-" + id + " num of players: " + activePlay.getPlayers());
         }
+    }
+
+    private boolean isNumber(String line) {
+
+        boolean amIValid = false;
+
+        try {
+            Integer.parseInt(line);
+            amIValid = true;
+        } catch (NumberFormatException e) {
+        }
+
+        return amIValid;
     }
 
 }
