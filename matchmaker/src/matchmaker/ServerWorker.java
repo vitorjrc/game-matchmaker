@@ -106,9 +106,17 @@ public class ServerWorker implements Runnable {
             // -----------------------------------------------------------------
             // Escolher campeão
             //receber mensagens do utilizador e difundir pelos restantes utilizadores
+            /*
             String msg = null;
             while ((msg = in.readLine()) != null) {
                 activePlay.multicast(loggedUser.getUsername(), msg);
+            }
+             */
+            // codigo teste broadcast
+            while ((line = in.readLine()) != null) {
+                System.out.println("\nWorker-" + id + " > Received message from client: " + line);
+                activePlay.multicast(loggedUser.getUsername(), line);
+                System.out.println("Worker-" + id + " > Broadcasted with: " + line);
             }
 
             // codigo standard usado pelos profs
@@ -117,7 +125,7 @@ public class ServerWorker implements Runnable {
                 out.write(line);
                 out.newLine();
                 out.flush();
-                System.out.println("Worker-" + id + " > Reply with: " + line);
+                System.out.println("Worker-" + id + " > Broadcasted with: " + line);
             }
             // FIM DE ESCOLHA DE JOGADORES
 
@@ -246,6 +254,7 @@ public class ServerWorker implements Runnable {
             activePlay = new Play(player.getRanking());
             // disabled for testing purposes
             activePlay.addPlayer(loggedUser);
+            activePlay.registerClientOut(loggedUser.getUsername(), out); // para que depois seja possível obter o BufferedWriter para comunicação
             game.launchNewPlay(activePlay.getRanking(), activePlay);
             System.out.println("Worker-" + id + " created a NEW PLAY.");
             System.out.println("Worker-" + id + " num of players: " + activePlay.getPlayers());

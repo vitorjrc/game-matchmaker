@@ -20,7 +20,7 @@ public class Play {
     // O arraylist guarda o user e o boneco que o mesmo escolheu
     private Map<User, String> team1 = null;
     private Map<User, String> team2 = null;
-    private Map<String, BufferedWriter> clients = null; // utilizador associado ao seu out
+    private Map<String, BufferedWriter> clients = null; // utilizador associado ao seu out do server para ele
     // talvez insira array para guarder selecionadas
     private int ranking;
     private int players;

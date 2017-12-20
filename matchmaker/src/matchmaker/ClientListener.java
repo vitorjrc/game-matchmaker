@@ -21,6 +21,10 @@ public class ClientListener implements Runnable {
         in = input;
     }
 
+    /**
+     * Used to continuously read the messages broadcasted
+     */
+    @Override
     public void run() {
         String message;
         try {

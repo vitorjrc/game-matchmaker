@@ -68,6 +68,13 @@ public class Client {
             Thread listener = new Thread(new ClientListener(in));
             listener.start();
 
+            // Receber as mensagens do utilizador para o chat
+            while ((userInput = systemIn.readLine()) != null && !userInput.equals("quit")) {
+                out.write(userInput);
+                out.newLine();
+                out.flush();
+            }
+
             // Falar com o servidor para escolher personagem
             while ((userInput = systemIn.readLine()) != null && !userInput.equals("quit")) {
                 out.write(userInput);
@@ -80,6 +87,7 @@ public class Client {
             }
 
             //fechar sockets
+            systemIn.close();
             socket.shutdownOutput();
             socket.shutdownInput();
             socket.close();
