@@ -115,7 +115,7 @@ public class ServerWorker implements Runnable {
             // codigo teste broadcast
             while ((line = in.readLine()) != null) {
                 System.out.println("\nWorker-" + id + " > Received message from client: " + line);
-                activePlay.multicast(loggedUser.getUsername(), line);
+                activePlay.multicast(loggedUser, line);
                 System.out.println("Worker-" + id + " > Broadcasted with: " + line);
             }
 
@@ -238,7 +238,7 @@ public class ServerWorker implements Runnable {
             activePlay = game.getPlay(rank);
             // disabled for testing purposes - add that player to the game selectec
             activePlay.addPlayer(loggedUser); // ja da o update do numero de jogadores
-            activePlay.registerClientOut(loggedUser.getUsername(), out); // para que depois seja possível obter o BufferedWriter para comunicação
+            activePlay.registerClientOut(loggedUser, out); // para que depois seja possível obter o BufferedWriter para comunicação
             // check if the teams are full and the game ready to start (in case this is the last player, which is the one that will launch the choice menu)
             if (activePlay.isPlayFull()) {
 
@@ -254,7 +254,7 @@ public class ServerWorker implements Runnable {
             activePlay = new Play(player.getRanking());
             // disabled for testing purposes
             activePlay.addPlayer(loggedUser);
-            activePlay.registerClientOut(loggedUser.getUsername(), out); // para que depois seja possível obter o BufferedWriter para comunicação
+            activePlay.registerClientOut(loggedUser, out); // para que depois seja possível obter o BufferedWriter para comunicação
             game.launchNewPlay(activePlay.getRanking(), activePlay);
             System.out.println("Worker-" + id + " created a NEW PLAY.");
             System.out.println("Worker-" + id + " num of players: " + activePlay.getPlayers());

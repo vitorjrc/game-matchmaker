@@ -20,7 +20,7 @@ public class Play {
     // O arraylist guarda o user e o boneco que o mesmo escolheu
     private Map<User, String> team1 = null;
     private Map<User, String> team2 = null;
-    private Map<String, BufferedWriter> clients = null; // utilizador associado ao seu out do server para ele
+    private Map<User, BufferedWriter> clients = null; // utilizador associado ao seu out do server para ele
     // talvez insira array para guarder selecionadas
     private int ranking;
     private int players;
@@ -69,22 +69,29 @@ public class Play {
 
     }
 
-    public synchronized boolean registerClientOut(String nick, BufferedWriter writer) {
+    public synchronized boolean registerClientOut(User player, BufferedWriter writer) {
 
-        if (!clients.containsKey(nick)) {
-            clients.put(nick, writer);
+        if (!clients.containsKey(player)) {
+            clients.put(player, writer);
             return true;
         }
 
         return false;
     }
 
-    public synchronized void multicast(String userSender, String msg) {
-        msg = userSender + ": " + msg;
-        for (String user : clients.keySet()) {
-            if (!user.equals(userSender)) {
+    /*
+    * Broadcast a certain message for the team of the user.
+     */
+    public synchronized void multicast(User userSender, String msg) {
+        msg = userSender.getUsername() + ": " + msg;
+        for (User player : clients.keySet()) {
+            if (!player.getUsername().equals(userSender.getUsername()) // se não é o próprio utilizador
+                    && // se são da mesma equipa 1
+                    ((team1.containsKey(userSender) && team1.containsKey(player))
+                    || // se são da mesma equipa
+                    (team2.containsKey(userSender) && team2.containsKey(player)))) {
                 try {
-                    BufferedWriter bw = clients.get(user);
+                    BufferedWriter bw = clients.get(player);
                     bw.write(msg);
                     bw.newLine();
                     bw.flush();
