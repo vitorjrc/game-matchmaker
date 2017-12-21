@@ -57,7 +57,7 @@ public class Play {
 
     public boolean isPlayFull() {
 
-        return (players >= 10);
+        return (players >= 2); // TENHO QUE MUDAR PARA DEZ CAALHOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOO
     }
 
     public int getPlayers() {
@@ -136,6 +136,22 @@ public class Play {
                 } catch (IOException e) {
                     e.printStackTrace();
                 }
+            }
+        }
+    }
+
+    /*
+    * Broadcast a certain message for the team of the user.
+     */
+    public synchronized void broadcast(String msg) {
+        for (User player : clients.keySet()) {
+            try {
+                BufferedWriter bw = clients.get(player);
+                bw.write(msg);
+                bw.newLine();
+                bw.flush();
+            } catch (IOException e) {
+                e.printStackTrace();
             }
         }
     }

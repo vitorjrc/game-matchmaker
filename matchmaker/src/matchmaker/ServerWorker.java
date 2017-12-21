@@ -96,7 +96,7 @@ public class ServerWorker implements Runnable {
             out.newLine();
             out.write("Entrou numa partida de ranking: " + Integer.toString(activePlay.getRanking()) + ".");
             out.newLine();
-            out.write("Insira o número do campeão que deseja (de 1 a 30)!");
+            out.write("A sua partida começa dentro de momentos. Aguarde...");
             out.newLine();
             out.flush();
             System.out.println("\nWorker-" + id + " > Informed login to user: " + loggedUser.getUsername()
@@ -104,8 +104,18 @@ public class ServerWorker implements Runnable {
             // FIM DE PREPARAÇÃO DE PARTIDA NOVA
 
             // -----------------------------------------------------------------
+            while (!activePlay.isPlayFull()) {
+                // Esperamos que partida esteja cheia para lançarmos a seleção de personagens ao mesmo tempo
+            }
+
+            // Iniciar o tempo limite de seleção de personagens
+            SelectionTimer temporizador = new SelectionTimer();
+            System.out.println("Task scheduled.");
+
+            // Informar a todos os jogadores que podem escolher o seu campeão
+            activePlay.broadcast("Selecione o seu jogador (de 1 a 30). Tem 30 segundos para o fazer!");
+
             // Escolher campeão
-            //receber mensagens do utilizador e difundir pelos restantes utilizadores
             while ((line = in.readLine()) != null) {
                 System.out.println("\nWorker-" + id + " > Received message from client: " + line);
                 if (isNumber(line) && (Integer.parseInt(line) > 0) && (Integer.parseInt(line) < 31)) {
@@ -181,7 +191,7 @@ public class ServerWorker implements Runnable {
                 // Confirma password e informa entrada
                 if (((password = in.readLine()) != null) && password.equals(users.get(username).getPassword())) {
                     System.out.println("\nWorker-" + id + " > Received message from client: " + password);
-                    out.write("ENTER para continuar.");
+                    out.write("LOGIN BEM SUCEDIDO");
                     out.newLine();
                     out.flush();
                     loggedUser = users.get(username); // User fica logado na thread
@@ -278,6 +288,9 @@ public class ServerWorker implements Runnable {
         }
     }
 
+    /*
+    * Check if the input is readable by the parseInt. If not, we just return false so the system will not fail
+     */
     private boolean isNumber(String line) {
 
         boolean amIValid = false;

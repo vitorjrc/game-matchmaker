@@ -46,19 +46,22 @@ public class Client {
             System.out.print("\n$ ");
 
             // Menu inicial
-            while ((userInput = systemIn.readLine()) != null && !userInput.equals("quit") && !response.equals("ENTER para continuar.")) {
+            while ((userInput = systemIn.readLine()) != null && !userInput.equals("quit")) {
                 out.write(userInput);
                 out.newLine();
                 out.flush();
 
                 response = in.readLine();
+                if (response.equals("LOGIN BEM SUCEDIDO")) {
+                    break;
+                }
                 System.out.println("> Received response from server: " + response);
             }
 
             // Receber informações da play em que entrou
             while ((response = in.readLine()) != null) {
                 System.out.println(response);
-                if (response.equals("Insira o número do campeão que deseja (de 1 a 30)!")) {
+                if (response.equals("A sua partida começa dentro de momentos. Aguarde...")) {
                     break;
                 }
             }
