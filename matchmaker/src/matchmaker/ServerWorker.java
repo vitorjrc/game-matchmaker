@@ -103,6 +103,11 @@ public class ServerWorker implements Runnable {
                     + ", playing in game ranked: " + Integer.toString(activePlay.getRanking()));
             // FIM DE PREPARAÇÃO DE PARTIDA NOVA
 
+            // Esperar que play esteja cheia
+            while (!activePlay.isPlayFull()) {
+                System.out.println("\nWorker-" + id + " > Informed WAITING");
+            }
+
             // Informar ao jogador que pode escolher o seu campeão
             System.out.println("Worker-" + id + " > ASKED to CHOOSE CHAMPION with: " + line);
             out.write("Selecione o seu jogador (de 1 a 30). Tem 30 segundos para o fazer!");
