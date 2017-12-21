@@ -6,7 +6,16 @@ import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.OutputStreamWriter;
 import java.net.Socket;
+import java.util.concurrent.Callable;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.ExecutionException;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.concurrent.Future;
+import java.util.concurrent.TimeUnit;
+import java.util.concurrent.TimeoutException;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 public class ServerWorker implements Runnable {
 
@@ -105,7 +114,7 @@ public class ServerWorker implements Runnable {
 
             // Esperar que play esteja cheia
             while (!activePlay.isPlayFull()) {
-                System.out.println("\nWorker-" + id + " > Informed WAITING");
+                System.out.println("\nWorker-" + id + " > Informed user  " + loggedUser.getUsername() + " WAITING");
             }
 
             // Informar ao jogador que pode escolher o seu campeão
@@ -113,6 +122,26 @@ public class ServerWorker implements Runnable {
             out.write("Selecione o seu jogador (de 1 a 30). Tem 30 segundos para o fazer!");
             out.newLine();
             out.flush();
+
+            // 30 segundos para fazer a escolha
+            ExecutorService executor = Executors.newSingleThreadExecutor();
+            Future<String> future = executor.submit(new ChampionSelection());
+
+            try {
+                System.out.println("Started..");
+                System.out.println(future.get(3, TimeUnit.SECONDS));
+                System.out.println("Finished!");
+            } catch (TimeoutException e) {
+                future.cancel(true);
+                System.out.println("Terminated!");
+            } catch (InterruptedException ex) {
+                Logger.getLogger(ServerWorker.class.getName()).log(Level.SEVERE, null, ex);
+            } catch (ExecutionException ex) {
+                Logger.getLogger(ServerWorker.class.getName()).log(Level.SEVERE, null, ex);
+            }
+
+            executor.shutdownNow();
+            // -----------------------------------------------------------------
 
             // Escolher campeão
             while ((line = in.readLine()) != null) {
@@ -301,6 +330,17 @@ public class ServerWorker implements Runnable {
         }
 
         return amIValid;
+    }
+
+    class ChampionSelection implements Callable<String> {
+
+        @Override
+        public String call() throws Exception {
+            System.out.println("ANTES");
+            Thread.sleep(2000); // Just to demo a long running task of 4 seconds.
+            System.out.println("DEPOIS");
+            return "Ready!";
+        }
     }
 
 }
