@@ -134,15 +134,17 @@ public class ServerWorker implements Runnable {
             } catch (TimeoutException e) {
                 future.cancel(true);
                 System.out.println("Terminated!");
-            } catch (InterruptedException ex) {
-                Logger.getLogger(ServerWorker.class.getName()).log(Level.SEVERE, null, ex);
-            } catch (ExecutionException ex) {
+            } catch (InterruptedException | ExecutionException ex) {
                 Logger.getLogger(ServerWorker.class.getName()).log(Level.SEVERE, null, ex);
             }
 
             executor.shutdownNow();
             // -----------------------------------------------------------------
 
+            // Escolher campeão
+            chooseChampion(in, out);
+
+            /*
             // Escolher campeão
             while ((line = in.readLine()) != null) {
                 System.out.println("\nWorker-" + id + " > Received message from client: " + line);
@@ -167,8 +169,9 @@ public class ServerWorker implements Runnable {
                     out.flush();
                 }
             }
+             */
 
-            /* CODIGO PARA CHAT
+ /* CODIGO PARA CHAT
             while ((line = in.readLine()) != null) {
                 System.out.println("\nWorker-" + id + " > Received message from client: " + line);
                 activePlay.teamcast(loggedUser, line);
@@ -316,6 +319,36 @@ public class ServerWorker implements Runnable {
         }
     }
 
+    // Escolher campeão
+    private void chooseChampion(BufferedReader in, BufferedWriter out) throws IOException {
+
+        String line;
+
+        while ((line = in.readLine()) != null) {
+            System.out.println("\nWorker-" + id + " > Received message from client: " + line);
+            if (isNumber(line) && (Integer.parseInt(line) > 0) && (Integer.parseInt(line) < 31)) {
+                if (activePlay.chooseChampion(loggedUser, line)) { // já mete o campeão associado ao player
+                    activePlay.teamcast(loggedUser, line); // diz à equipa que aquele jogador escolheu aquele campeao
+                    System.out.println("Worker-" + id + " > Player " + loggedUser.getUsername() + " choosed champion: " + line);
+                    System.out.println("Worker-" + id + " > Teamcasted with: " + line);
+                    out.write("Campeão selecionado! Caso queira mudar, basta inserir outro número.");
+                    out.newLine();
+                    out.flush();
+                } else {
+                    System.out.println("\nWorker-" + id + " > Informed UNAVAILABLE CHAMPION to: " + loggedUser.getUsername());
+                    out.write("Campeão indisponível! Escolha outro.");
+                    out.newLine();
+                    out.flush();
+                }
+            } else {
+                System.out.println("\nWorker-" + id + " > Informed INVALID CHAMPION to: " + loggedUser.getUsername());
+                out.write("Esse campeão ainda não nasceu! Escolha outro.");
+                out.newLine();
+                out.flush();
+            }
+        }
+    }
+
     /*
     * Check if the input is readable by the parseInt. If not, we just return false so the system will not fail
      */
@@ -337,7 +370,7 @@ public class ServerWorker implements Runnable {
         @Override
         public String call() throws Exception {
             System.out.println("ANTES");
-            Thread.sleep(2000); // Just to demo a long running task of 4 seconds.
+            Thread.sleep(4000); // Just to demo a long running task of 4 seconds.
             System.out.println("DEPOIS");
             return "Ready!";
         }
