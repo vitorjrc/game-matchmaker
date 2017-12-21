@@ -103,17 +103,11 @@ public class ServerWorker implements Runnable {
                     + ", playing in game ranked: " + Integer.toString(activePlay.getRanking()));
             // FIM DE PREPARAÇÃO DE PARTIDA NOVA
 
-            // -----------------------------------------------------------------
-            while (!activePlay.isPlayFull()) {
-                // Esperamos que partida esteja cheia para lançarmos a seleção de personagens ao mesmo tempo
-            }
-
-            // Iniciar o tempo limite de seleção de personagens
-            SelectionTimer temporizador = new SelectionTimer();
-            System.out.println("Task scheduled.");
-
-            // Informar a todos os jogadores que podem escolher o seu campeão
-            activePlay.broadcast("Selecione o seu jogador (de 1 a 30). Tem 30 segundos para o fazer!");
+            // Informar ao jogador que pode escolher o seu campeão
+            System.out.println("Worker-" + id + " > ASKED to CHOOSE CHAMPION with: " + line);
+            out.write("Selecione o seu jogador (de 1 a 30). Tem 30 segundos para o fazer!");
+            out.newLine();
+            out.flush();
 
             // Escolher campeão
             while ((line = in.readLine()) != null) {

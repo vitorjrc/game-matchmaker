@@ -65,11 +65,22 @@ public class Client {
                     break;
                 }
             }
-            System.out.print("\n$ ");
 
+            // Esperar por mensagem a dizer "Selecione o seu jogador (de 1 a 30). Tem 30 segundos para o fazer!"
+            /*
+            * Esta mensagem vai ser enviada a todos os players ao mesmo tempo e depois eles vão ter 30 segundos para fazerem as alterações que quiserem
+             */
             //Criar listener thread para receber mensagens relativas a outros utilizadores
             Thread listener = new Thread(new ClientListener(in));
             listener.start();
+
+            // Falar com o servidor para escolher personagem
+            // VOU TER QUE POR ISTO EM THREAD COM TEMPO LIMITADOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOO a 30 sec
+            while ((userInput = systemIn.readLine()) != null && !userInput.equals("quit")) {
+                out.write(userInput);
+                out.newLine();
+                out.flush();
+            }
 
             /*
             // Receber as mensagens do utilizador para o chat
@@ -79,13 +90,6 @@ public class Client {
                 out.flush();
             }
              */
-            // Falar com o servidor para escolher personagem
-            while ((userInput = systemIn.readLine()) != null && !userInput.equals("quit")) {
-                out.write(userInput);
-                out.newLine();
-                out.flush();
-            }
-
             //fechar sockets
             systemIn.close();
             socket.shutdownOutput();
