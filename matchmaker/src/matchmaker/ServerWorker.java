@@ -5,7 +5,11 @@ import java.io.BufferedWriter;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.OutputStreamWriter;
+import static java.lang.Thread.sleep;
 import java.net.Socket;
+import java.util.Random;
+import java.util.Timer;
+import java.util.TimerTask;
 import java.util.concurrent.Callable;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ExecutionException;
@@ -123,9 +127,44 @@ public class ServerWorker implements Runnable {
             out.newLine();
             out.flush();
 
+            // Escolher campeão
+            /*
+            final ExecutorService executor = Executors.newSingleThreadExecutor();
+            final Future future = executor.submit(new Runnable() {
+                @Override
+                public void run() {
+                    try {
+                        chooseChampion(in, out);
+                    } catch (IOException ex) {
+                        Logger.getLogger(ServerWorker.class.getName()).log(Level.SEVERE, null, ex);
+                    }
+                }
+            });
+            executor.shutdown(); // This does not cancel the already-scheduled task.
+
+            try {
+                future.get(5, TimeUnit.SECONDS);
+            } catch (InterruptedException | ExecutionException | TimeoutException ie) {
+                System.out.println("TEMPO ACABOU!");
+            }
+
+            if (!executor.isTerminated()) {
+                executor.shutdownNow(); // If you want to stop the code that hasn't finished.
+            }
+             */
             // 30 segundos para fazer a escolha
+            /*
             ExecutorService executor = Executors.newSingleThreadExecutor();
-            Future<String> future = executor.submit(new ChampionSelection());
+            Future<String> future = (Future<String>) executor.submit(new Runnable() {
+                @Override
+                public void run() {
+                    try {
+                        chooseChampion(in, out);
+                    } catch (IOException ex) {
+                        Logger.getLogger(ServerWorker.class.getName()).log(Level.SEVERE, null, ex);
+                    }
+                }
+            });
 
             try {
                 System.out.println("Started..");
@@ -139,10 +178,41 @@ public class ServerWorker implements Runnable {
             }
 
             executor.shutdownNow();
+             */
             // -----------------------------------------------------------------
-
-            // Escolher campeão
-            chooseChampion(in, out);
+            /*
+            Timer timer = new Timer();
+            timer.schedule(new TimerTask() {
+                @Override
+                public void run() {
+                    try {
+                        chooseChampion(in, out); // metodo que tem toda a logica
+                    } catch (IOException ex) {
+                        Logger.getLogger(ServerWorker.class.getName()).log(Level.SEVERE, null, ex);
+                    }
+                }
+            }, 0, 10 * (1000 * 1)); // 10 -> 10 segundos
+             */
+            // @@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
+            //chooseChampion(in, out);
+            /*
+            //Criar lobby thread para receber e transmitir escolhas
+            Thread lobby = new Thread(new ChampionsLobby(id, in, out, loggedUser, activePlay));
+            lobby.start();
+             */
+            // @@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
+            /*
+            // Esperar os 30 segundos
+            int timeLimit = 30;
+            while (timeLimit > 0) {
+                Thread.sleep(1000);
+                timeLimit--;
+                System.out.println(timeLimit);
+            }
+             */
+            // Parar a thread do lobby porque o tempo acabou
+            // System.out.println("\nWorker-" + id + " > LOBBY INTERRUPTED.");
+            //lobby.interrupt();
 
             /*
             // Escolher campeão
@@ -178,6 +248,33 @@ public class ServerWorker implements Runnable {
                 System.out.println("Worker-" + id + " > Broadcasted with: " + line);
             }
              */
+            // Iniciar escolha de campeão
+            chooseChampion(in, out);
+
+            // Ver se todos os jogadores escolheram
+            if (activePlay.allChampionsPicked()) {
+                System.out.println("\nWorker-" + id + " > Players selected champions!");
+                out.write("Jogando...");
+                out.newLine();
+                out.flush();
+                if (activePlay.didTeam1Win()) {
+                    out.write("Ganhou a EQUIPA 1!");
+                    out.newLine();
+                    out.flush();
+                    // FALTA METODO PARA AUMENTAR RANKING DELES TODOS
+                } else {
+                    out.write("Ganhou a EQUIPA 2!");
+                    out.newLine();
+                    out.flush();
+                    // FALTA METODO PARA DIMINUIR RANKING DELES TODOS
+                }
+            } else {
+                System.out.println("\nWorker-" + id + " > Champions selection failed!");
+                out.write("Alguém não escolheu o seu campeão. Até já!");
+                out.newLine();
+                out.flush();
+            }
+
             // codigo standard usado pelos profs
             while ((line = in.readLine()) != null) {
                 System.out.println("\nWorker-" + id + " > Received message from client: " + line);
@@ -310,6 +407,7 @@ public class ServerWorker implements Runnable {
         else {
 
             activePlay = new Play(player.getRanking());
+            activePlay.winningTeamRandom(); // definir equipa vencedora por random
             // disabled for testing purposes
             activePlay.addPlayer(loggedUser);
             activePlay.registerClientOut(loggedUser, out); // para que depois seja possível obter o BufferedWriter para comunicação
@@ -341,10 +439,17 @@ public class ServerWorker implements Runnable {
                     out.flush();
                 }
             } else {
-                System.out.println("\nWorker-" + id + " > Informed INVALID CHAMPION to: " + loggedUser.getUsername());
-                out.write("Esse campeão ainda não nasceu! Escolha outro.");
-                out.newLine();
-                out.flush();
+                if (line.equals("jogar")) {
+                    out.write("Esperando pelos outros jogadores...");
+                    out.newLine();
+                    out.flush();
+                    break;
+                } else {
+                    System.out.println("\nWorker-" + id + " > Informed INVALID CHAMPION to: " + loggedUser.getUsername());
+                    out.write("Esse campeão ainda não nasceu! Escolha outro.");
+                    out.newLine();
+                    out.flush();
+                }
             }
         }
     }

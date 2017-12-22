@@ -9,6 +9,7 @@ import java.io.BufferedWriter;
 import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Random;
 
 /**
  *
@@ -24,6 +25,7 @@ public class Play {
     // talvez insira array para guarder selecionadas
     private int ranking;
     private int players;
+    private boolean team1Wins;
 
     public Play(int rank) {
         team1 = new HashMap<>();
@@ -36,6 +38,24 @@ public class Play {
     public int getRanking() {
 
         return ranking;
+    }
+
+    public void winningTeamRandom() {
+
+        Random rn = new Random();
+        int answer = rn.nextInt(10) + 1; // gera numeros de 1 a 10
+
+        if (answer <= 5) {
+            team1Wins = true;
+        } else {
+            team1Wins = false;
+        }
+
+    }
+
+    public boolean didTeam1Win() {
+
+        return team1Wins;
     }
 
     // disabled for testing purposes
@@ -101,6 +121,28 @@ public class Play {
             }
             // como não foi selecionado, pode pôr
             team2.put(player, selectedChampion);
+        }
+
+        return true;
+
+    }
+
+    public boolean allChampionsPicked() {
+
+        for (Integer jogador : team1.values()) {
+            if (jogador.equals(0)) {
+                return false;
+            } else {
+                continue;
+            }
+        }
+
+        for (Integer jogador : team2.values()) {
+            if (jogador.equals(0)) {
+                return false;
+            } else {
+                continue;
+            }
         }
 
         return true;

@@ -32,7 +32,6 @@ public class ClientListener implements Runnable {
                 System.out.println(message);
             }
         } catch (IOException e) {
-            e.printStackTrace();
         }
     }
 
