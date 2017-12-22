@@ -1,0 +1,1 @@
+fazer uma thread auxiliar que inicie quando iniciar a cena do chooseChampion mas do lado do cliente. ela vai dormir 30 segundos e ao fim desse manda a mensagem "jogar" pelo bufferedwriter in, e do outro lado o server sai do ciclo. seems goooooooooooooooooood
