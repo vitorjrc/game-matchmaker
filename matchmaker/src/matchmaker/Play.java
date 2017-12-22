@@ -198,4 +198,23 @@ public class Play {
         }
     }
 
+    // Update rankings according to the winning team
+    public void rankingUpdate(User player, int team) {
+
+        if (team == 1) { // equipa vencedora foi a 1
+            if (team1.containsKey(player)) { // player faz parte da vencedora
+                player.increaseRanking();
+            } else { // faz parte da perdedora 
+                player.decreaseRanking();
+            }
+        } else { // equipa vencedora foi a 2
+            if (team2.containsKey(player)) {
+                player.increaseRanking();
+            } else {
+                player.decreaseRanking();
+            }
+        }
+
+    }
+
 }

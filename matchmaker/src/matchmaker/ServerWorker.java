@@ -132,8 +132,11 @@ public class ServerWorker implements Runnable {
                 out.flush();
             }
             // Parar a thread do lobby porque o tempo acabou
-            System.out.println("\nWorker-" + id + " > LOBBY INTERRUPTED.");
-            lobby.interrupt();
+            out.write("Terminou o tempo!");
+            out.newLine();
+            out.flush();
+            lobby.stop();
+            System.out.println("\nWorker-" + id + " > LOBBY STOPPED.");
 
             // Ver se todos os jogadores escolheram
             if (activePlay.allChampionsPicked()) {
@@ -145,12 +148,18 @@ public class ServerWorker implements Runnable {
                     out.write("Ganhou a EQUIPA 1!");
                     out.newLine();
                     out.flush();
-                    // FALTA METODO PARA AUMENTAR RANKING DELES TODOS
+                    activePlay.rankingUpdate(loggedUser, 1);
+                    out.write("O seu novo ranking é: " + loggedUser.getRanking());
+                    out.newLine();
+                    out.flush();
                 } else {
                     out.write("Ganhou a EQUIPA 2!");
                     out.newLine();
                     out.flush();
-                    // FALTA METODO PARA DIMINUIR RANKING DELES TODOS
+                    activePlay.rankingUpdate(loggedUser, 2);
+                    out.write("O seu novo ranking é: " + loggedUser.getRanking());
+                    out.newLine();
+                    out.flush();
                 }
             } else {
                 System.out.println("\nWorker-" + id + " > Champions selection failed!");
@@ -159,7 +168,13 @@ public class ServerWorker implements Runnable {
                 out.flush();
             }
 
+            System.out.println("\nWorker-" + id + " > ASKED TO OUT!");
+            out.write("Escreva quit para sair.");
+            out.newLine();
+            out.flush();
+
             // codigo standard usado pelos profs
+            /*
             while ((line = in.readLine()) != null) {
                 System.out.println("\nWorker-" + id + " > Received message from client: " + line);
                 out.write(line);
@@ -167,8 +182,7 @@ public class ServerWorker implements Runnable {
                 out.flush();
                 System.out.println("Worker-" + id + " > Broadcasted with: " + line);
             }
-            // FIM DE ESCOLHA DE JOGADORES
-
+             */
             System.out.println("\nWorker-" + id + " > Client disconnected. Connection is closed.\n");
 
             //fechar sockets
