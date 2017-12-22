@@ -28,7 +28,7 @@ public class ClientListener implements Runnable {
     public void run() {
         String message;
         try {
-            while ((message = in.readLine()) != null) {
+            while ((message = in.readLine()) != null && !message.equals("PLAYSTARTED")) {
                 System.out.println(message);
             }
         } catch (IOException e) {

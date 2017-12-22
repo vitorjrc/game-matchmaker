@@ -73,18 +73,8 @@ public class Client {
             //Criar listener thread para receber mensagens relativas a outros utilizadores
             Thread listener = new Thread(new ClientListener(in));
             listener.start();
-            /*
-            // Esperar os 30 segundos
-            int timeLimit = 30;
-            while (timeLimit > 0) {
-                Thread.sleep(5000);
-                timeLimit = timeLimit - 5;
-                System.out.println("Tempo restante: " + timeLimit);
-            }
-             */
 
             // Falar com o servidor para escolher personagem
-            // VOU TER QUE POR ISTO EM THREAD COM TEMPO LIMITADOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOO a 30 sec
             while ((userInput = systemIn.readLine()) != null && !userInput.equals("quit")) {
                 out.write(userInput);
                 out.newLine();

@@ -7,17 +7,8 @@ import java.io.InputStreamReader;
 import java.io.OutputStreamWriter;
 import static java.lang.Thread.sleep;
 import java.net.Socket;
-import java.util.Random;
-import java.util.Timer;
-import java.util.TimerTask;
 import java.util.concurrent.Callable;
 import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.ExecutionException;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
-import java.util.concurrent.Future;
-import java.util.concurrent.TimeUnit;
-import java.util.concurrent.TimeoutException;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -127,129 +118,22 @@ public class ServerWorker implements Runnable {
             out.newLine();
             out.flush();
 
-            // Escolher campeão
-            /*
-            final ExecutorService executor = Executors.newSingleThreadExecutor();
-            final Future future = executor.submit(new Runnable() {
-                @Override
-                public void run() {
-                    try {
-                        chooseChampion(in, out);
-                    } catch (IOException ex) {
-                        Logger.getLogger(ServerWorker.class.getName()).log(Level.SEVERE, null, ex);
-                    }
-                }
-            });
-            executor.shutdown(); // This does not cancel the already-scheduled task.
-
-            try {
-                future.get(5, TimeUnit.SECONDS);
-            } catch (InterruptedException | ExecutionException | TimeoutException ie) {
-                System.out.println("TEMPO ACABOU!");
-            }
-
-            if (!executor.isTerminated()) {
-                executor.shutdownNow(); // If you want to stop the code that hasn't finished.
-            }
-             */
-            // 30 segundos para fazer a escolha
-            /*
-            ExecutorService executor = Executors.newSingleThreadExecutor();
-            Future<String> future = (Future<String>) executor.submit(new Runnable() {
-                @Override
-                public void run() {
-                    try {
-                        chooseChampion(in, out);
-                    } catch (IOException ex) {
-                        Logger.getLogger(ServerWorker.class.getName()).log(Level.SEVERE, null, ex);
-                    }
-                }
-            });
-
-            try {
-                System.out.println("Started..");
-                System.out.println(future.get(3, TimeUnit.SECONDS));
-                System.out.println("Finished!");
-            } catch (TimeoutException e) {
-                future.cancel(true);
-                System.out.println("Terminated!");
-            } catch (InterruptedException | ExecutionException ex) {
-                Logger.getLogger(ServerWorker.class.getName()).log(Level.SEVERE, null, ex);
-            }
-
-            executor.shutdownNow();
-             */
-            // -----------------------------------------------------------------
-            /*
-            Timer timer = new Timer();
-            timer.schedule(new TimerTask() {
-                @Override
-                public void run() {
-                    try {
-                        chooseChampion(in, out); // metodo que tem toda a logica
-                    } catch (IOException ex) {
-                        Logger.getLogger(ServerWorker.class.getName()).log(Level.SEVERE, null, ex);
-                    }
-                }
-            }, 0, 10 * (1000 * 1)); // 10 -> 10 segundos
-             */
-            // @@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
-            //chooseChampion(in, out);
-            /*
+            // Iniciar escolha de campeão
             //Criar lobby thread para receber e transmitir escolhas
             Thread lobby = new Thread(new ChampionsLobby(id, in, out, loggedUser, activePlay));
             lobby.start();
-             */
-            // @@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
-            /*
+
             // Esperar os 30 segundos
-            int timeLimit = 30;
-            while (timeLimit > 0) {
-                Thread.sleep(1000);
-                timeLimit--;
-                System.out.println(timeLimit);
+            for (int i = 1; i <= 5; i++) {
+                waitFor(5);
+                System.out.println("Passaram " + (i * 5) + " segundos.");
+                out.write("Passaram " + (i * 5) + " segundos.");
+                out.newLine();
+                out.flush();
             }
-             */
             // Parar a thread do lobby porque o tempo acabou
-            // System.out.println("\nWorker-" + id + " > LOBBY INTERRUPTED.");
-            //lobby.interrupt();
-
-            /*
-            // Escolher campeão
-            while ((line = in.readLine()) != null) {
-                System.out.println("\nWorker-" + id + " > Received message from client: " + line);
-                if (isNumber(line) && (Integer.parseInt(line) > 0) && (Integer.parseInt(line) < 31)) {
-                    if (activePlay.chooseChampion(loggedUser, line)) { // já mete o campeão associado ao player
-                        activePlay.teamcast(loggedUser, line); // diz à equipa que aquele jogador escolheu aquele campeao
-                        System.out.println("Worker-" + id + " > Player " + loggedUser.getUsername() + " choosed champion: " + line);
-                        System.out.println("Worker-" + id + " > Teamcasted with: " + line);
-                        out.write("Campeão selecionado! Caso queira mudar, basta inserir outro número.");
-                        out.newLine();
-                        out.flush();
-                    } else {
-                        System.out.println("\nWorker-" + id + " > Informed UNAVAILABLE CHAMPION to: " + loggedUser.getUsername());
-                        out.write("Campeão indisponível! Escolha outro.");
-                        out.newLine();
-                        out.flush();
-                    }
-                } else {
-                    System.out.println("\nWorker-" + id + " > Informed INVALID CHAMPION to: " + loggedUser.getUsername());
-                    out.write("Esse campeão ainda não nasceu! Escolha outro.");
-                    out.newLine();
-                    out.flush();
-                }
-            }
-             */
-
- /* CODIGO PARA CHAT
-            while ((line = in.readLine()) != null) {
-                System.out.println("\nWorker-" + id + " > Received message from client: " + line);
-                activePlay.teamcast(loggedUser, line);
-                System.out.println("Worker-" + id + " > Broadcasted with: " + line);
-            }
-             */
-            // Iniciar escolha de campeão
-            chooseChampion(in, out);
+            System.out.println("\nWorker-" + id + " > LOBBY INTERRUPTED.");
+            lobby.interrupt();
 
             // Ver se todos os jogadores escolheram
             if (activePlay.allChampionsPicked()) {
@@ -294,6 +178,8 @@ public class ServerWorker implements Runnable {
 
         } catch (IOException e) {
             e.printStackTrace();
+        } catch (InterruptedException ex) {
+            Logger.getLogger(ServerWorker.class.getName()).log(Level.SEVERE, null, ex);
         }
 
     }
@@ -468,6 +354,10 @@ public class ServerWorker implements Runnable {
         }
 
         return amIValid;
+    }
+
+    private void waitFor(int i) throws InterruptedException {
+        sleep(i * 1000);
     }
 
     class ChampionSelection implements Callable<String> {
