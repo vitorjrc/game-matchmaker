@@ -21,7 +21,7 @@ public class ServerWorker implements Runnable {
     private Game game = null; // podia ser lol, FM, cs:go
     private User loggedUser = null;
     private Play activePlay = null;
-    
+
     private ReentrantLock lockServer = null;
 
     public ServerWorker(Socket socket, int id, HashMap<String, User> users, Game game, ReentrantLock lockServer) {
@@ -78,6 +78,7 @@ public class ServerWorker implements Runnable {
                     out.flush();
                     System.out.println("Worker-" + id + " asked for QUIT COMMAND.");
                     if ((line = in.readLine()) != null && line.equals("quit")) {
+
                         break; // ja esta feita a parte do menu de entrada
                     } else {
                         out.write("1. Iniciar sessao || 2. Registar utilizador || 3. Sair");
@@ -93,10 +94,20 @@ public class ServerWorker implements Runnable {
                 }
 
             }
+            System.out.println("\nWorker-" + id + " > FIM MENU ENTRADA\n");
             // FIM MENU ENTRADA
+            if (line.equals("quit")) {
+                System.out.println("\nWorker-" + id + " > Client disconnected. Connection is closed.\n");
 
+                //fechar sockets
+                socket.shutdownOutput();
+                socket.shutdownInput();
+                socket.close();
+                return;
+            }
             // -----------------------------------------------------------------
             // Inserir o jogador numa partida e dar a conhecer o seu BufferedWriter para as mensagens em team no lobby de seleção
+            System.out.println("\nWorker-" + id + " > ARRANGING PLAY\n");
             arrangePlay(loggedUser, out);
 
             // Informar login para o username X, jogo em que entrou e dizer para se preparar para escolher
@@ -111,11 +122,10 @@ public class ServerWorker implements Runnable {
                     + ", playing in game ranked: " + Integer.toString(activePlay.getRanking()));
             // FIM DE PREPARAÇÃO DE PARTIDA NOVA
 
-            
             // Esperar que play esteja cheia
             // TODO -> tentar eliminar esta espera ativa
             while (!activePlay.isPlayFull()) {
-               // System.out.println("\nWorker-" + id + " > Informed user  " + loggedUser.getUsername() + " WAITING");
+                // System.out.println("\nWorker-" + id + " > Informed user  " + loggedUser.getUsername() + " WAITING");
             }
 
             // Informar ao jogador que pode escolher o seu campeão
@@ -317,9 +327,8 @@ public class ServerWorker implements Runnable {
                 game.startPlay(activePlay); // tira a play actual das availables e dá como iniciada a mesma
                 System.out.println("Worker-" + id + " made ACTIVE PLAY an EXHISTANT one.");
 
-                
             }
-            
+
             System.out.println("Worker-" + id + " num of players: " + activePlay.getPlayers());
         } // criar novo jogo com ranking do primeiro jogador e adicionar o jogador à play. Fazer o jogo available para outros jogadores. activePlay é essa.
         else {

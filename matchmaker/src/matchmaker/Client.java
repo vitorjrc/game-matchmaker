@@ -58,6 +58,17 @@ public class Client {
                 System.out.println("> Received response from server: " + response);
             }
 
+            // PEDIU PARA SAIR, PORTANTO SAIMOS DANDO RETURN (POR CAUSA DO TRY)
+            if (userInput.equals("quit")) {
+                System.out.println("Até à próxima!");
+                //fechar sockets
+                systemIn.close();
+                socket.shutdownOutput();
+                socket.shutdownInput();
+                socket.close();
+                return;
+            }
+
             // Receber informações da play em que entrou
             while ((response = in.readLine()) != null) {
                 System.out.println(response);
