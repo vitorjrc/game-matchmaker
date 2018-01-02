@@ -35,12 +35,12 @@ public class Play {
         players = 0;
     }
 
-    public int getRanking() {
+    public synchronized int getRanking() {
 
         return ranking;
     }
 
-    public void winningTeamRandom() {
+    public synchronized void winningTeamRandom() {
 
         Random rn = new Random();
         int answer = rn.nextInt(10) + 1; // gera numeros de 1 a 10
@@ -53,13 +53,13 @@ public class Play {
 
     }
 
-    public boolean didTeam1Win() {
+    public synchronized boolean didTeam1Win() {
 
         return team1Wins;
     }
 
     // disabled for testing purposes
-    public void addPlayer(User player) {
+    public synchronized void addPlayer(User player) {
 
         if (team1.size() < 5) {
 
@@ -75,12 +75,12 @@ public class Play {
 
     }
 
-    public boolean isPlayFull() {
+    public synchronized boolean isPlayFull() {
 
-        return (players >= 2); // TENHO QUE MUDAR PARA DEZ CAALHOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOO
+        return (players >= 10); 
     }
 
-    public int getPlayers() {
+    public synchronized int getPlayers() {
 
         return players;
     }
@@ -88,7 +88,7 @@ public class Play {
     /*
     * Updates the champion of a given player if that champion is not choosed already
      */
-    public boolean chooseChampion(User player, String selected) {
+    public synchronized boolean chooseChampion(User player, String selected) {
 
         Integer selectedChampion = new Integer(selected);
 
@@ -127,7 +127,7 @@ public class Play {
 
     }
 
-    public boolean allChampionsPicked() {
+    public synchronized boolean allChampionsPicked() {
 
         for (Integer jogador : team1.values()) {
             if (jogador.equals(0)) {
@@ -199,7 +199,7 @@ public class Play {
     }
 
     // Update rankings according to the winning team
-    public void rankingUpdate(User player, int team) {
+    public synchronized void rankingUpdate(User player, int team) {
 
         if (team == 1) { // equipa vencedora foi a 1
             if (team1.containsKey(player)) { // player faz parte da vencedora

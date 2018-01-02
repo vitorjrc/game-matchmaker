@@ -4,15 +4,17 @@ import java.io.IOException;
 import java.net.ServerSocket;
 import java.net.Socket;
 import java.util.HashMap;
-import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.locks.ReentrantLock;
 
 public class Server {
 
     private ServerSocket servsocket;
     private int porto;
-    private static ConcurrentHashMap<String, User> users = new ConcurrentHashMap<String, User>();
+    private static HashMap<String, User> users = new HashMap<String, User>();
     private Game overwatch = new Game();
 
+    private ReentrantLock lockServer = new ReentrantLock();
+    
     public Server(int porto) {
         this.porto = porto;
     }
@@ -28,7 +30,7 @@ public class Server {
                 Socket socket = servsocket.accept();
                 System.out.println("ServerMain > Connection received! Create worker thread to handle connection.");
 
-                ServerWorker sw = new ServerWorker(socket, workerCounter++, users, overwatch);
+                ServerWorker sw = new ServerWorker(socket, workerCounter++, users, overwatch,lockServer);
                 new Thread(sw).start();
             }
         } catch (IOException e) {
@@ -52,6 +54,7 @@ public class Server {
         User user10 = new User("vitor", "123456");
         User user11 = new User("marcos", "123456");
         User user12 = new User("diana", "123456");
+        User user13 = new User("zé", "123456");
         users.put("um", user1);
         users.put("dois", user2);
         users.put("tres", user3);
@@ -64,6 +67,7 @@ public class Server {
         users.put("vitor", user10);
         users.put("marcos", user11);
         users.put("diana", user12);
+        users.put("zé", user13);
         //
 
         s.startServer();
