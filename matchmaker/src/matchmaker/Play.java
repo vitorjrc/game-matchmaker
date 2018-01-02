@@ -77,7 +77,7 @@ public class Play {
 
     public synchronized boolean isPlayFull() {
 
-        return (players >= 10); 
+        return (players >= 2);
     }
 
     public synchronized int getPlayers() {
@@ -204,7 +204,7 @@ public class Play {
         if (team == 1) { // equipa vencedora foi a 1
             if (team1.containsKey(player)) { // player faz parte da vencedora
                 player.increaseRanking();
-            } else { // faz parte da perdedora 
+            } else { // faz parte da perdedora
                 player.decreaseRanking();
             }
         } else { // equipa vencedora foi a 2

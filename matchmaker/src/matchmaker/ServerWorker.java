@@ -50,53 +50,7 @@ public class ServerWorker implements Runnable {
             out.flush();
             System.out.println("Worker-" + id + " sended Welcome Message.");
 
-            // Receber e tratar resposta do menu de entrada
-            while ((line = in.readLine()) != null) {
-                System.out.println("\nWorker-" + id + " > Received message from client: " + line);
-
-                // Recebe pedido de inicio de sessao
-                if (line.equals("1")) {
-                    // Log in correu bem, portanto saímos do ciclo de menu
-                    if (logIn(in, out)) {
-                        break;
-                    } else {
-                        continue;
-                    }
-                }
-
-                // Recebe pedido de inscricao
-                if (line.equals("2")) {
-                    register(in, out);
-                    continue;
-                }
-
-                // Recebe pedido de saida
-                if (line.equals("3")) {
-                    // Pede que insira "quit"
-                    out.write("Escreva 'quit' para sair.");
-                    out.newLine();
-                    out.flush();
-                    System.out.println("Worker-" + id + " asked for QUIT COMMAND.");
-                    if ((line = in.readLine()) != null && line.equals("quit")) {
-
-                        break; // ja esta feita a parte do menu de entrada
-                    } else {
-                        out.write("1. Iniciar sessao || 2. Registar utilizador || 3. Sair");
-                        out.newLine();
-                        out.flush();
-                        System.out.println("Worker-" + id + " showed MENU.");
-                    }
-                } else { // Caso algo falhou, mostra menu de novo
-                    out.write("1. Iniciar sessao || 2. Registar utilizador || 3. Sair");
-                    out.newLine();
-                    out.flush();
-                    System.out.println("Worker-" + id + " showed MENU.");
-                }
-
-            }
-            System.out.println("\nWorker-" + id + " > FIM MENU ENTRADA\n");
-            // FIM MENU ENTRADA
-            if (line.equals("quit")) {
+            if (!launchMenu(in, out)) {
                 System.out.println("\nWorker-" + id + " > Client disconnected. Connection is closed.\n");
 
                 //fechar sockets
@@ -105,6 +59,9 @@ public class ServerWorker implements Runnable {
                 socket.close();
                 return;
             }
+            System.out.println("\nWorker-" + id + " > FIM MENU ENTRADA\n");
+            // FIM MENU ENTRADA
+
             // -----------------------------------------------------------------
             // Inserir o jogador numa partida e dar a conhecer o seu BufferedWriter para as mensagens em team no lobby de seleção
             System.out.println("\nWorker-" + id + " > ARRANGING PLAY\n");
@@ -129,7 +86,7 @@ public class ServerWorker implements Runnable {
             }
 
             // Informar ao jogador que pode escolher o seu campeão
-            System.out.println("Worker-" + id + " > ASKED to CHOOSE CHAMPION with: " + line);
+            System.out.println("Worker-" + id + " > ASKED to CHOOSE CHAMPION.");
             out.write("Selecione o seu jogador (de 1 a 30). Tem 30 segundos para o fazer!");
             out.newLine();
             out.flush();
@@ -399,6 +356,59 @@ public class ServerWorker implements Runnable {
 
     private void waitFor(int i) throws InterruptedException {
         sleep(i * 1000);
+    }
+
+    private boolean launchMenu(BufferedReader in, BufferedWriter out) throws IOException {
+
+        String line, username, password;
+
+        // Receber e tratar resposta do menu de entrada
+        while ((line = in.readLine()) != null) {
+            System.out.println("\nWorker-" + id + " > Received message from client: " + line);
+
+            // Recebe pedido de inicio de sessao
+            if (line.equals("1")) {
+                // Log in correu bem, portanto saímos do ciclo de menu
+                if (logIn(in, out)) {
+                    return true; // fizemos logIn e menu acaba com sucesso
+                } else {
+                    continue;
+                }
+            }
+
+            // Recebe pedido de inscricao
+            if (line.equals("2")) {
+                register(in, out);
+                continue;
+            }
+
+            // Recebe pedido de saida
+            if (line.equals("3")) {
+                // Pede que insira "quit"
+                out.write("Escreva 'quit' para sair.");
+                out.newLine();
+                out.flush();
+                System.out.println("Worker-" + id + " asked for QUIT COMMAND.");
+                if ((line = in.readLine()) != null && line.equals("quit")) {
+
+                    return false; // pedido de quit, continuar = false
+                } else {
+                    out.write("1. Iniciar sessao || 2. Registar utilizador || 3. Sair");
+                    out.newLine();
+                    out.flush();
+                    System.out.println("Worker-" + id + " showed MENU.");
+                }
+            } else { // Caso algo falhou, mostra menu de novo
+                out.write("1. Iniciar sessao || 2. Registar utilizador || 3. Sair");
+                out.newLine();
+                out.flush();
+                System.out.println("Worker-" + id + " showed MENU.");
+            }
+
+        }
+
+        return false; // fechados os canais do outro lado, vamos sair
+
     }
 
     class ChampionSelection implements Callable<String> {
