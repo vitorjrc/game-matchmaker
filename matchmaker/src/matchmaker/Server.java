@@ -30,7 +30,7 @@ public class Server {
                 Socket socket = servsocket.accept();
                 System.out.println("ServerMain > Connection received! Create worker thread to handle connection.");
 
-                ServerWorker sw = new ServerWorker(socket, workerCounter++, users, overwatch,lockServer);
+                ServerWorker sw = new ServerWorker(socket, workerCounter++, users, overwatch, lockServer);
                 new Thread(sw).start();
             }
         } catch (IOException e) {
@@ -42,32 +42,44 @@ public class Server {
         Server s = new Server(12345);
 
         // Testar users
-        User user1 = new User("um", "123456");
-        User user2 = new User("dois", "123456");
-        User user3 = new User("tres", "123456");
-        User user4 = new User("quatro", "123456");
-        User user5 = new User("cinco", "123456");
-        User user6 = new User("seis", "123456");
-        User user7 = new User("sete", "123456");
-        User user8 = new User("oito", "123456");
-        User user9 = new User("sergio", "123456");
-        User user10 = new User("vitor", "123456");
-        User user11 = new User("marcos", "123456");
-        User user12 = new User("diana", "123456");
-        User user13 = new User("zé", "123456");
-        users.put("um", user1);
-        users.put("dois", user2);
-        users.put("tres", user3);
-        users.put("quatro", user4);
-        users.put("cinco", user5);
-        users.put("seis", user6);
-        users.put("sete", user7);
-        users.put("oito", user8);
-        users.put("sergio", user9);
-        users.put("vitor", user10);
-        users.put("marcos", user11);
-        users.put("diana", user12);
-        users.put("zé", user13);
+        users.put("um", new User("um", "123456"));
+        users.put("dois", new User("dois", "123456"));
+        users.put("tres", new User("tres", "123456"));
+        users.put("quatro", new User("quatro", "123456"));
+        users.put("cinco", new User("cinco", "123456"));
+        users.put("seis", new User("seis", "123456"));
+        users.put("sete", new User("sete", "123456"));
+        users.put("oito", new User("oito", "123456"));
+        users.put("sergio", new User("sergio", "123456"));
+        users.put("vitor", new User("vitor", "123456"));
+        users.put("marcos", new User("marcos", "123456"));
+        users.put("diana", new User("diana", "123456"));
+        users.put("zé", new User("zé", "123456"));
+        users.put("a", new User("a", "123456"));
+        users.put("b", new User("b", "123456"));
+        users.put("c", new User("c", "123456"));
+        users.put("e", new User("e", "123456"));
+        users.put("f", new User("f", "123456"));
+        users.put("g", new User("g", "123456"));
+        users.put("h", new User("h", "123456"));
+        users.put("i", new User("i", "123456"));
+        users.put("j", new User("j", "123456"));
+        users.put("k", new User("k", "123456"));
+        users.put("l", new User("l", "123456"));
+        users.put("m", new User("m", "123456"));
+        users.put("n", new User("n", "123456"));
+        users.put("o", new User("o", "123456"));
+        users.put("p", new User("p", "123456"));
+        users.put("q", new User("q", "123456"));
+        users.put("r", new User("r", "123456"));
+        users.put("s", new User("s", "123456"));
+        users.put("t", new User("t", "123456"));
+        users.put("u", new User("u", "123456"));
+        users.put("v", new User("v", "123456"));
+        users.put("w", new User("w", "123456"));
+        users.put("x", new User("x", "123456"));
+        users.put("y", new User("y", "123456"));
+        users.put("z", new User("z", "123456"));
         //
 
         s.startServer();

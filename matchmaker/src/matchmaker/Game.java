@@ -1,8 +1,3 @@
-/*
- * To change this license header, choose License Headers in Project Properties.
- * To change this template file, choose Tools | Templates
- * and open the template in the editor.
- */
 package matchmaker;
 
 import java.util.HashMap;
@@ -12,7 +7,8 @@ import java.util.concurrent.ConcurrentHashMap;
  *
  * @author Vitor Castro
  */
-//Métodos synchronized implementados(todos) TODO-> verificar se há alguns que não seja necessário garantir o lock
+// Métodos synchronized implementados (todos)
+// TODO-> verificar se há alguns que não seja necessário garantir o lock
 public class Game {
 
     // tem os jogos atualmente ativos, por ranking. faz-se remove quando é finalizado
