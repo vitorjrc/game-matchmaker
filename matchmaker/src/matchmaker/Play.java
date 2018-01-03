@@ -77,7 +77,7 @@ public class Play {
 
     public synchronized boolean isPlayFull() {
 
-        return (players >= 2);
+        return (players >= 10);
     }
 
     public synchronized int getPlayers() {

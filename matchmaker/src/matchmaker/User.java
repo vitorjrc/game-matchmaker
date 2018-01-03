@@ -16,25 +16,25 @@ public class User {
         ranking = 0;
     }
 
-    public synchronized String getUsername() {
+    public String getUsername() {
         return username;
     }
 
-    public synchronized String getPassword() {
+    public String getPassword() {
         return password;
     }
 
-    public synchronized int getRanking() {
+    public int getRanking() {
         return ranking;
     }
 
-    public synchronized void increaseRanking() {
+    public void increaseRanking() {
         if (ranking < 9) {
             ranking++;
         }
     }
 
-    public synchronized void decreaseRanking() {
+    public void decreaseRanking() {
         if (ranking > 0) {
             ranking--;
         }
