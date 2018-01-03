@@ -190,6 +190,10 @@ public class ServerWorker implements Runnable {
                 if (((password = in.readLine()) != null) && this.server.login(username, password)) {
                 	
                 	// TODO - Não podemos guardar referência a User, tem de ser String do username
+                	// Isto pode causar problemas de concorrência, uma vez que estamos a colocar a informação
+                	// sobre se o utilizador está logado ou não em mais que um sítio (só devia estar no Server, this.server)
+                	// No entanto acho que não está a causar problemas neste momento.
+                	
                 	loggedUser = new User(username, password); // User fica logado na thread
                 	
                     System.out.println("\nWorker-" + id + " > Received message from client: " + password);
@@ -298,43 +302,6 @@ public class ServerWorker implements Runnable {
         }
     }
 
-    // Escolher campeão
-    private void chooseChampion(BufferedReader in, BufferedWriter out) throws IOException {
-
-        String line;
-
-        while ((line = in.readLine()) != null) {
-            System.out.println("\nWorker-" + id + " > Received message from client: " + line);
-            if (isNumber(line) && (Integer.parseInt(line) > 0) && (Integer.parseInt(line) < 31)) {
-                if (activePlay.chooseChampion(loggedUser, line)) { // já mete o campeão associado ao player
-                    activePlay.teamcast(loggedUser, line); // diz à equipa que aquele jogador escolheu aquele campeao
-                    System.out.println("Worker-" + id + " > Player " + loggedUser.getUsername() + " choosed champion: " + line);
-                    System.out.println("Worker-" + id + " > Teamcasted with: " + line);
-                    out.write("Campeão selecionado! Caso queira mudar, basta inserir outro número.");
-                    out.newLine();
-                    out.flush();
-                } else {
-                    System.out.println("\nWorker-" + id + " > Informed UNAVAILABLE CHAMPION to: " + loggedUser.getUsername());
-                    out.write("Campeão indisponível! Escolha outro.");
-                    out.newLine();
-                    out.flush();
-                }
-            } else {
-                if (line.equals("jogar")) {
-                    out.write("Esperando pelos outros jogadores...");
-                    out.newLine();
-                    out.flush();
-                    break;
-                } else {
-                    System.out.println("\nWorker-" + id + " > Informed INVALID CHAMPION to: " + loggedUser.getUsername());
-                    out.write("Esse campeão ainda não nasceu! Escolha outro.");
-                    out.newLine();
-                    out.flush();
-                }
-            }
-        }
-    }
-
     /*
     * Check if the input is readable by the parseInt. If not, we just return false so the system will not fail
      */
@@ -357,7 +324,7 @@ public class ServerWorker implements Runnable {
 
     private boolean launchMenu(BufferedReader in, BufferedWriter out) throws IOException {
 
-        String line, username, password;
+        String line;
 
         // Receber e tratar resposta do menu de entrada
         while ((line = in.readLine()) != null) {

@@ -119,7 +119,6 @@ public class Server {
         testUsers.put("x", new User("x", "123456"));
         testUsers.put("y", new User("y", "123456"));
         testUsers.put("z", new User("z", "123456"));
-
         //
 
         Server s = new Server(12345);
