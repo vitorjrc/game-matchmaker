@@ -1,0 +1,15 @@
+3. SERVIDOR
+
+Será aqui detalhado como se decidiu implementar a parte do Servidor, de modo a responder aos requisitos pedidos.
+Explicar-se-ão as classes criadas e o seu papel na representação do problema em questão. Vai ser explanado o método usado para permitir que vários clientes se conectem e interajam com o servidor, bem como é executado o controlo de concorrência das várias threads e como o ServerWorker processa todas as mensagens que recebe, em cada momento, para poder enviar mensagens úteis de volta.
+
+3.1. Classes: ServerWorker, Play, User, Game, ChampionsLobby
+
+Vão ser explicadas as classes referenciadas, sendo que a ServerWorker será mais aprofundada no ponto 3.2, em Funcionamento.
+
+3.1.1. ServerWorker
+Esta classe Runnable é lançada pelo Server sempre que um novo Client se liga. Por cada cliente será lançada uma thread com esta classe, tornando assim possível que vários utilizadores se liguem ao servidor, simultaneamente. Será esta a classe a conter toda a lógica necessária ao funcionamento do jogo, sendo-lhe dedicada uma secção "Funcionamento" própria, em 3.2. O Server lançará cada ServerWorker passando-lhe os utilizadores que estariam inscritos, um HashMap<String, User>, sendo a String o nome de utilizador. Também será passado o jogo a ser disponibilizado por aquele servidor, no caso o Overwatch.
+
+3.1.2. Play
+
+
