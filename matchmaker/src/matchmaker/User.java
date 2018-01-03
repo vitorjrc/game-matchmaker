@@ -9,6 +9,7 @@ public class User {
     private String username;
     private String password;
     private int ranking;
+    private boolean loggedIn;
 
     public User(String user, String pass) {
         username = user;
@@ -38,5 +39,13 @@ public class User {
         if (ranking > 0) {
             ranking--;
         }
+    }
+    
+    public void setLoggedIn(boolean l) {
+    	this.loggedIn = l;
+    }
+    
+    public boolean isLoggedIn() {
+    	return this.loggedIn;
     }
 }

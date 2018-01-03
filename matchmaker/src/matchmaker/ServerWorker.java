@@ -17,19 +17,16 @@ public class ServerWorker implements Runnable {
 
     private Socket socket;
     private int id;
-    private HashMap<String, User> users = null;
     private Game game = null; // podia ser lol, FM, cs:go
     private User loggedUser = null;
     private Play activePlay = null;
+    private Server server;
 
-    private ReentrantLock lockServer = null;
-
-    public ServerWorker(Socket socket, int id, HashMap<String, User> users, Game game, ReentrantLock lockServer) {
+    public ServerWorker(Socket socket, int id, Server server, Game game) {
         this.socket = socket;
         this.id = id;
-        this.users = users; // Passamos direto, fica com o acesso aberto ao array de utilizadores do servidor
+        this.server = server;
         this.game = game;
-        this.lockServer = lockServer;
     }
 
     @Override
@@ -39,16 +36,13 @@ public class ServerWorker implements Runnable {
             //criar canais de leitura/escrita no socket
             BufferedReader in = new BufferedReader(new InputStreamReader(socket.getInputStream()));
             BufferedWriter out = new BufferedWriter(new OutputStreamWriter(socket.getOutputStream()));
-            String line;	//string para ler mensagens do cliente
-            String username;
-            String password;
 
             // -----------------------------------------------------------------
             // Boas vindas e menu de entrada.
             out.write("BEM-VINDO AO MELHOR JOGO DE SEMPRE!\n1. Iniciar sessao\n2. Registar-se\n3. Sair");
             out.newLine();
             out.flush();
-            System.out.println("Worker-" + id + " sended Welcome Message.");
+            System.out.println("Worker-" + id + " sent Welcome Message.");
 
             if (!launchMenu(in, out)) {
                 System.out.println("\nWorker-" + id + " > Client disconnected. Connection is closed.\n");
@@ -108,7 +102,7 @@ public class ServerWorker implements Runnable {
             out.write("Terminou o tempo!");
             out.newLine();
             out.flush();
-            lobby.stop();
+            lobby.interrupt();
             System.out.println("\nWorker-" + id + " > LOBBY STOPPED.");
 
             // Ver se todos os jogadores escolheram
@@ -141,7 +135,7 @@ public class ServerWorker implements Runnable {
                 out.flush();
             }
 
-            System.out.println("\nWorker-" + id + " > ASKED TO OUT!");
+            System.out.println("\nWorker-" + id + " > ASKED TO QUIT!");
             out.write("Escreva quit para sair.");
             out.newLine();
             out.flush();
@@ -182,48 +176,52 @@ public class ServerWorker implements Runnable {
             out.newLine();
             out.flush();
             System.out.println("Worker-" + id + " asked for USERNAME.");
-            // obtemos o lock do server principal para acedar ao HashMap dos utilizadores
-            lockServer.lock();
-            // Se existir pede password
-            if (((username = in.readLine()) != null) && users.containsKey(username)) {
+
+            // Pede password
+            if (((username = in.readLine()) != null)) {
+            	
                 System.out.println("\nWorker-" + id + " > Received message from client: " + username);
                 out.write("Insira a sua password.");
                 out.newLine();
                 out.flush();
                 System.out.println("Worker-" + id + " asked for PASSWORD.");
+                
                 // Confirma password e informa entrada
-                if (((password = in.readLine()) != null) && password.equals(users.get(username).getPassword())) {
+                if (((password = in.readLine()) != null) && this.server.login(username, password)) {
+                	
+                	// TODO - Não podemos guardar referência a User, tem de ser String do username
+                	loggedUser = new User(username, password); // User fica logado na thread
+                	
                     System.out.println("\nWorker-" + id + " > Received message from client: " + password);
                     out.write("LOGIN BEM SUCEDIDO");
                     out.newLine();
                     out.flush();
-                    loggedUser = users.get(username); // User fica logado na thread
                     System.out.println("Worker-" + id + " accepted user.");
 
                     return true;
+                    
                 } // Informa pass errada
                 else {
-                    out.write("PASSWORD errada! > 1. Iniciar sessao || 2. Registar utilizador || 3. Sair");
+                	
+                    out.write("USERNAME ou PASSWORD errados! > 1. Iniciar sessao || 2. Registar utilizador || 3. Sair");
                     out.newLine();
                     out.flush();
-                    System.out.println("Worker-" + id + " WRONG PASSWORD.");
+                    System.out.println("Worker-" + id + " WRONG PASSWORD OR USERNAME.");
 
                     return false;
+                    
                 }
-            } // Informa username inexistente
+            } // Informa username nulo
             else {
-                out.write("USERNAME não existe! > 1. Iniciar sessao || 2. Registar utilizador || 3. Sair");
+                out.write("USERNAME nulo! > 1. Iniciar sessao || 2. Registar utilizador || 3. Sair");
                 out.newLine();
                 out.flush();
-                System.out.println("Worker-" + id + " INEXISTENT USERNAME.");
+                System.out.println("Worker-" + id + " NULL USERNAME.");
 
                 return false;
             }
         } catch (IOException e) {
             e.printStackTrace();
-        } finally {
-            //libertamos o lock para outras threads acederem
-            lockServer.unlock();
         }
 
         return false;
@@ -240,29 +238,28 @@ public class ServerWorker implements Runnable {
             out.newLine();
             out.flush();
             System.out.println("Worker-" + id + " asked for NEW USERNAME.");
-            // obtemos o lock do server principal para aceder ao HashMap dos utilizadores
-            lockServer.lock();
-            // Se estiver disponivel, pede password
-            if (((username = in.readLine()) != null) && !users.containsKey(username)) {
+
+            if (((username = in.readLine()) != null)) {
                 out.write("Insira a sua password.");
                 out.newLine();
                 out.flush();
                 System.out.println("Worker-" + id + " asked for NEW PASSWORD.");
+                
                 // Confirma password e informa entrada
                 if (((password = in.readLine()) != null)) {
+                	
                     User newUser = new User(username, password);
-                    users.put(username, newUser);
+                    this.server.register(username, newUser);
+                    
                     out.write("Username: " + username + " Password: " + password + " criado. > 1. Iniciar sessao || 2. Registar utilizador || 3. Sair");
                     out.newLine();
                     out.flush();
                     System.out.println("Worker-" + id + " created NEW USER.");
+                    
                 }
             }
         } catch (IOException e) {
             e.printStackTrace();
-        } finally {
-            // libertamos o lock para outras threads acederem
-            lockServer.unlock();
         }
 
     }
