@@ -5,7 +5,7 @@ import java.net.ServerSocket;
 import java.net.Socket;
 import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.concurrent.locks.ReentrantLock;
+import java.util.concurrent.TimeUnit;
 
 public class Server {
 
@@ -119,26 +119,37 @@ public class Server {
         testUsers.put("x", new User("x", "123456"));
         testUsers.put("y", new User("y", "123456"));
         testUsers.put("z", new User("z", "123456"));
+
         //
 
         Server s = new Server(12345);
+        
+        Runnable test = () -> {
+
+	    	// Testar com todos os users
+		
+			// Esperar que o servidor ligue
+			try {
+				TimeUnit.SECONDS.sleep(2);
+			} catch (InterruptedException e) {
+				e.printStackTrace();
+			}
+	    
+	        ArrayList<Thread> clients = new ArrayList<>();
+	        
+	        for (User u : testUsers.values()) {
+	        	
+	        	s.register(u.getUsername(), u);
+	        	
+	        	Runnable temp = new TestClient("127.0.0.1", 12345, u.getUsername(), u.getPassword());
+	        	        	
+	        	Thread t = new Thread(temp);
+	        	clients.add(t);
+	        	t.start();
+	        }
+        };
+        
+        new Thread(test).start();
         s.startServer();
-        
-        // Testar com todos os users
-        
-        ArrayList<Thread> clients = new ArrayList<>();
-        
-        for (User u : testUsers.values()) {
-        	
-        	System.out.println("Testing: " + u.getUsername());
-        	
-        	s.register(u.getUsername(), u);
-        	
-        	Runnable temp = new TestClient("127.0.0.1", 12345, u.getUsername(), u.getPassword());
-        	        	
-        	Thread t = new Thread(temp);
-        	clients.add(t);
-        	t.start();
-        }
     }
 }
