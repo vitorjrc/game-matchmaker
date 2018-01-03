@@ -6,8 +6,6 @@ import java.util.HashMap;
  *
  * @author Vitor Castro
  */
-// Métodos synchronized implementados (todos)
-// TODO-> verificar se há alguns que não seja necessário garantir o lock
 public class Game {
 
     // tem os jogos atualmente ativos, por ranking. faz-se remove quando é finalizado

@@ -15,7 +15,6 @@ import java.util.Random;
  *
  * @author Vitor Castro
  */
-// NAO ESTA A PERMITIR CONCORRENCIA AINDA
 public class Play {
 
     // O arraylist guarda o user e o boneco que o mesmo escolheu (boneco = 0 se ainda não escolheu)

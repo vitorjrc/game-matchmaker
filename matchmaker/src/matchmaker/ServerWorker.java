@@ -140,16 +140,6 @@ public class ServerWorker implements Runnable {
             out.newLine();
             out.flush();
 
-            // codigo standard usado pelos profs
-            /*
-            while ((line = in.readLine()) != null) {
-                System.out.println("\nWorker-" + id + " > Received message from client: " + line);
-                out.write(line);
-                out.newLine();
-                out.flush();
-                System.out.println("Worker-" + id + " > Broadcasted with: " + line);
-            }
-             */
             System.out.println("\nWorker-" + id + " > Client disconnected. Connection is closed.\n");
 
             //fechar sockets
@@ -179,23 +169,22 @@ public class ServerWorker implements Runnable {
 
             // Pede password
             if (((username = in.readLine()) != null)) {
-            	
+
                 System.out.println("\nWorker-" + id + " > Received message from client: " + username);
                 out.write("Insira a sua password.");
                 out.newLine();
                 out.flush();
                 System.out.println("Worker-" + id + " asked for PASSWORD.");
-                
+
                 // Confirma password e informa entrada
                 if (((password = in.readLine()) != null) && this.server.login(username, password)) {
-                	
-                	// TODO - Não podemos guardar referência a User, tem de ser String do username
-                	// Isto pode causar problemas de concorrência, uma vez que estamos a colocar a informação
-                	// sobre se o utilizador está logado ou não em mais que um sítio (só devia estar no Server, this.server)
-                	// No entanto acho que não está a causar problemas neste momento.
-                	
-                	loggedUser = new User(username, password); // User fica logado na thread
-                	
+
+                    // TODO - Não podemos guardar referência a User, tem de ser String do username
+                    // Isto pode causar problemas de concorrência, uma vez que estamos a colocar a informação
+                    // sobre se o utilizador está logado ou não em mais que um sítio (só devia estar no Server, this.server)
+                    // No entanto acho que não está a causar problemas neste momento.
+                    loggedUser = new User(username, password); // User fica logado na thread
+
                     System.out.println("\nWorker-" + id + " > Received message from client: " + password);
                     out.write("LOGIN BEM SUCEDIDO");
                     out.newLine();
@@ -203,17 +192,17 @@ public class ServerWorker implements Runnable {
                     System.out.println("Worker-" + id + " accepted user.");
 
                     return true;
-                    
+
                 } // Informa pass errada
                 else {
-                	
+
                     out.write("USERNAME ou PASSWORD errados! > 1. Iniciar sessao || 2. Registar utilizador || 3. Sair");
                     out.newLine();
                     out.flush();
                     System.out.println("Worker-" + id + " WRONG PASSWORD OR USERNAME.");
 
                     return false;
-                    
+
                 }
             } // Informa username nulo
             else {
@@ -248,18 +237,18 @@ public class ServerWorker implements Runnable {
                 out.newLine();
                 out.flush();
                 System.out.println("Worker-" + id + " asked for NEW PASSWORD.");
-                
+
                 // Confirma password e informa entrada
                 if (((password = in.readLine()) != null)) {
-                	
+
                     User newUser = new User(username, password);
                     this.server.register(username, newUser);
-                    
+
                     out.write("Username: " + username + " Password: " + password + " criado. > 1. Iniciar sessao || 2. Registar utilizador || 3. Sair");
                     out.newLine();
                     out.flush();
                     System.out.println("Worker-" + id + " created NEW USER.");
-                    
+
                 }
             }
         } catch (IOException e) {

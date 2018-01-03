@@ -92,14 +92,6 @@ public class Client {
                 out.flush();
             }
 
-            /*
-            // Receber as mensagens do utilizador para o chat
-            while ((userInput = systemIn.readLine()) != null && !userInput.equals("quit")) {
-                out.write(userInput);
-                out.newLine();
-                out.flush();
-            }
-             */
             //fechar sockets
             systemIn.close();
             socket.shutdownOutput();
