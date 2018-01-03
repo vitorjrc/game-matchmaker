@@ -46,7 +46,23 @@ public class Server {
     		return false;
     	}
     	
-    	return this.users.get(username).getPassword().equals(password);
+    	if (this.users.get(username).getPassword().equals(password)) {
+    		
+    		this.users.get(username).setLoggedIn(true);
+    		return true;
+    	}
+    	
+    	return false;
+    }
+    
+    /*
+     * Logout, unsynchronized because there's no race to logout, only to login
+     */
+    public void logout(String username) {
+    	
+    	if (this.users.containsKey(username)) {
+    		this.users.get(username).setLoggedIn(false);
+    	}
     }
     
     public synchronized boolean register(String username, User user) {
@@ -113,6 +129,8 @@ public class Server {
         ArrayList<Thread> clients = new ArrayList<>();
         
         for (User u : testUsers.values()) {
+        	
+        	System.out.println("Testing: " + u.getUsername());
         	
         	s.register(u.getUsername(), u);
         	
