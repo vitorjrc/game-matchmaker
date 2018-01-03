@@ -1,7 +1,6 @@
 package matchmaker;
 
 import java.util.HashMap;
-import java.util.concurrent.ConcurrentHashMap;
 
 /**
  *

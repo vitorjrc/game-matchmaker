@@ -3,6 +3,7 @@ package matchmaker;
 import java.io.IOException;
 import java.net.ServerSocket;
 import java.net.Socket;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.concurrent.locks.ReentrantLock;
 
@@ -39,7 +40,6 @@ public class Server {
     }
 
     public static void main(String[] args) {
-        Server s = new Server(12345);
 
         // Testar users
         users.put("um", new User("um", "123456"));
@@ -82,6 +82,19 @@ public class Server {
         users.put("z", new User("z", "123456"));
         //
 
+        Server s = new Server(12345);
         s.startServer();
+        
+        // Testar com todos os users
+        
+        ArrayList<TestClient> clients = new ArrayList<TestClient>();
+        
+        for (User u : users.values()) {
+        	
+        	TestClient temp = new TestClient("127.0.0.1", 12345);
+        	
+        	clients.add(temp);
+            temp.start(u.getUsername(), u.getPassword());
+        }
     }
 }
