@@ -3,7 +3,8 @@
 Será aqui detalhado como se decidiu implementar a parte do Servidor, de modo a responder aos requisitos pedidos.
 Explicar-se-ão as classes criadas e o seu papel na representação do problema em questão. Vai ser explanado o método usado para permitir que vários clientes se conectem e interajam com o servidor, bem como é executado o controlo de concorrência das várias threads e como o ServerWorker processa todas as mensagens que recebe, em cada momento, para poder enviar mensagens úteis de volta.
 
-3.1. Classes: ServerWorker, Play, User, Game, ChampionsLobby
+
+3.1. CLASSES: ServerWorker, Play, User, Game, ChampionsLobby
 
 Vão ser explicadas as classes referenciadas, sendo que a ServerWorker será mais aprofundada no ponto 3.2, em Funcionamento.
 
@@ -11,5 +12,33 @@ Vão ser explicadas as classes referenciadas, sendo que a ServerWorker será mai
 Esta classe Runnable é lançada pelo Server sempre que um novo Client se liga. Por cada cliente será lançada uma thread com esta classe, tornando assim possível que vários utilizadores se liguem ao servidor, simultaneamente. Será esta a classe a conter toda a lógica necessária ao funcionamento do jogo, sendo-lhe dedicada uma secção "Funcionamento" própria, em 3.2. O Server lançará cada ServerWorker passando-lhe os utilizadores que estariam inscritos, um HashMap<String, User>, sendo a String o nome de utilizador. Também será passado o jogo a ser disponibilizado por aquele servidor, no caso o Overwatch.
 
 3.1.2. Play
+Esta classe vai representar cada partida em que os utilizadores podem entrar. Armazena os Users presentes na equipa 1 e na equipa 2, nos HashMap<User, Integer> team1 e team2, sendo o Integer o boneco escolhido pelo User, no final do período de seleção. Existe também um HashMap<User, BufferedWriter> clients, que associada a cada User de cada equipa o respetivo BufferedWriter do server para ele. 
+Os HashMap team1 e team2 serão necessários para fazer todas as operações como escolha de heróis e mudanças nos rankings, e o clients será necessário para proceder à difusão de mensagens na fase de escolha de campeões.
+winningTeamRandom() é o método que é lançado aquando da criação de uma nova partida, para decidir qual a equipa vencedora.
+addPlayer() adiciona o utilizador recentemente logado a esta partida, que foi identificada como adequada para a sua entrada.
+isPlayFull() vai permitir lançar o lobby de seleção de campeões quando todos os jogadores estiverem prontos.
+chooseChampion() permitirá verificar se determinado campeão pode ser escolhido no momento de seleção de campeões.
+allChampionsPicked() será necessário para, no fim dos 30 segundos de seleção, verificar se todos os jogadores têm um campeão destinado.
+teamcast() é necessário para o envio das mensagens relativas a qual campeão aquele jogador escolheu para o resto da equipa.
+broadcast() faz o mesmo que teamcast() mas para todos os jogadores, independentemente da equipa. Será usado para informar o tempo decorrido na seleção de campeões.
+rankingUpdate() permitirá melhorar/piorar o ranking dos jogadores, de acordo com o resultado obtido.
+// FALAR DE CONCORRENCIA
+
+3.1.3. User
+Guardará o username e a password de cada utilizador no sistema, bem como o seu ranking.
+
+3.1.4. Game
+Guarda HashMaps plays e closedPlays, contendo plays de acordo com o Ranking da partida.
+// FALAR DE CONCORRENCIA E COMO UM USER NÃO PODE ENTRAR NUMA PLAY JÁ CHEIA
+
+3.1.5. ChampionsLobby
+Classe Runnable que é lançada numa thread no ServerWorker, que permitirá aos jogadores fazerem a seleção dos seus campeões. Serão chamados métodos de outras classes para que se verifique a possibilidade de chamar aqueles campeões, a determinada altura.
 
 
+3.2. FUNCIONAMENTO
+
+Depois de lançado o ServerWorker, aquando da conexão do Client ao Server, inicia-se o envio de uma mensagem de boas vindas, seguindo-se o lançamento do método launchMenu(), que irá receber as seleções dos utilizadores, podendo estes fazer login, registo ou sairem. No caso de quererem fazer login, é lançado o método logIn() em que é pedido o username e a palavra passe, sendo feita a verificação. Caso falhe, será apresentado novo menu inicial. No caso de registo, é lançado register() que fará a aceitação de um novo User. 
+Depois de concluido o login, o jogador é introduzido numa jogado de acordo com o seu ranking, sendo que caso ainda não haja nenhuma jogada disponível para este, é criada uma nova.
+Depois disto, são transmitidas informações ao jogador sobre a partida em que está inserido e é pedido para aguardar por outros jogadores, até que o limite de 10 jogadores seja atingido.
+Uma vez atingido este limite, verificado por isPlayFull(), é informado o utilizadorque deve selecionar um campeão de 1 a 30, sendo lançada a thread responsável por coletar e gerir essa seleção, lançando a classe ChampionsLobby (Runnable). É então iniciado um período de espera de 30 segundos, findo o qual é enviada uma mensagem de fim de período de escolha e a thread responsável pela escolha de campeões é parada.
+É então verificado se todos os jogadores têm campeões e dada a conhecer a equipa vencedora, atualizando-se os rankings dos participantes. É assim finalizada a partida.
