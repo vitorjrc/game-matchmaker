@@ -44,8 +44,8 @@ public class ChampionsLobby implements Runnable {
                 if (isNumber(line) && (Integer.parseInt(line) > 0) && (Integer.parseInt(line) < 31)) {
                     if (activePlay.chooseChampion(loggedUser, line)) { // já mete o campeão associado ao player
                         activePlay.teamcast(loggedUser, line); // diz à equipa que aquele jogador escolheu aquele campeao
-                        System.out.println("Worker-" + id + " > Player " + loggedUser + " choosed champion: " + line);
-                        System.out.println("Worker-" + id + " > Teamcasted with: " + line);
+                        System.out.println("Worker-" + id + " > Player " + loggedUser + " chose champion: " + line);
+                        //System.out.println("Worker-" + id + " > Teamcasted with: " + line);
                         out.write("Campeão selecionado! Caso queira mudar, basta inserir outro número.");
                         out.newLine();
                         out.flush();

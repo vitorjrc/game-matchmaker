@@ -43,7 +43,7 @@ public class ServerWorker implements Runnable {
             System.out.println("Worker-" + id + " sent Welcome Message.");
 
             if (!launchMenu(in, out)) {
-                System.out.println("\nWorker-" + id + " > Client disconnected. Connection is closed.\n");
+                System.out.println("\nWorker-" + id + " > Client disconnected. Connection is closed.");
 
                 //fechar sockets
                 socket.shutdownOutput();
@@ -51,106 +51,124 @@ public class ServerWorker implements Runnable {
                 socket.close();
                 return;
             }
-            System.out.println("\nWorker-" + id + " > FIM MENU ENTRADA\n");
+            System.out.println("\nWorker-" + id + " > FIM MENU ENTRADA");
             // FIM MENU ENTRADA
 
-            // -----------------------------------------------------------------
-            // Inserir o jogador numa partida e dar a conhecer o seu BufferedWriter para as mensagens em team no lobby de seleção
-            System.out.println("\nWorker-" + id + " > ARRANGING PLAY\n");
-            arrangePlay(loggedUser, out);
-
-            // Informar login para o username X, jogo em que entrou e dizer para se preparar para escolher
-            out.write("Login efetuado, " + loggedUser + ".");
-            out.newLine();
-            out.write("Entrou numa partida de ranking: " + Integer.toString(activePlay.getRanking()) + ".");
-            out.newLine();
-            out.write("A sua partida começa dentro de momentos. Aguarde...");
-            out.newLine();
-            out.flush();
-            System.out.println("\nWorker-" + id + " > Informed login to user: " + loggedUser
-                    + ", playing in game ranked: " + Integer.toString(activePlay.getRanking()));
-            // FIM DE PREPARAÇÃO DE PARTIDA NOVA
-
-            // Esperar que play esteja cheia
-            synchronized(activePlay) {
-            	
-            	while (!activePlay.isPlayFull()) {
-            		activePlay.wait();
-            	}
-            }
+            boolean keepPlaying = true;
             
-            System.out.println("\nWorker-" + id + " > Play which user " + loggedUser + " is in has filled up and is about to start.");
-
-            // Informar ao jogador que pode escolher o seu campeão
-            System.out.println("Worker-" + id + " > ASKED to CHOOSE CHAMPION.");
-            out.write("Selecione o seu jogador (de 1 a 30). Tem 30 segundos para o fazer!");
-            out.newLine();
-            out.flush();
-
-            // Iniciar escolha de campeão
-            //Criar lobby thread para receber e transmitir escolhas
-            Thread lobby = new Thread(new ChampionsLobby(id, in, out, loggedUser, activePlay));
-            lobby.start();
-
-            // Esperar os 30 segundos
-            for (int i = 1; i <= 5; i++) {
-                waitFor(5);
-                System.out.println("Passaram " + (i * 5) + " segundos.");
-                out.write("Passaram " + (i * 5) + " segundos.");
-                out.newLine();
-                out.flush();
+            while (keepPlaying) {
+            
+            	// -----------------------------------------------------------------
+	            // Inserir o jogador numa partida e dar a conhecer o seu BufferedWriter para as mensagens em team no lobby de seleção
+	            System.out.println("\nWorker-" + id + " > ARRANGING PLAY");
+	            arrangePlay(loggedUser, out);
+	
+	            // Informar login para o username X, jogo em que entrou e dizer para se preparar para escolher
+	            out.write("Login efetuado, " + loggedUser + ".");
+	            out.newLine();
+	            out.write("Entrou numa partida de ranking: " + Integer.toString(activePlay.getRanking()) + ".");
+	            out.newLine();
+	            out.write("A sua partida começa dentro de momentos. Aguarde...");
+	            out.newLine();
+	            out.flush();
+	            System.out.println("\nWorker-" + id + " > Informed login to user: " + loggedUser
+	                    + ", playing in game ranked: " + Integer.toString(activePlay.getRanking()));
+	            // FIM DE PREPARAÇÃO DE PARTIDA NOVA
+	
+	            // Esperar que play esteja cheia
+	            synchronized(activePlay) {
+	            	
+	            	while (!activePlay.isPlayFull()) {
+	            		activePlay.wait();
+	            	}
+	            }
+	            
+	            System.out.println("\nWorker-" + id + " > Play which user " + loggedUser + " is in has filled up and is about to start.");
+	
+	            // Informar ao jogador que pode escolher o seu campeão
+	            System.out.println("Worker-" + id + " > ASKED to CHOOSE CHAMPION.");
+	            out.write("Selecione o seu jogador (de 1 a 30). Tem 30 segundos para o fazer!");
+	            out.newLine();
+	            out.flush();
+	
+	            // Iniciar escolha de campeão
+	            //Criar lobby thread para receber e transmitir escolhas
+	            Thread lobby = new Thread(new ChampionsLobby(id, in, out, loggedUser, activePlay));
+	            lobby.start();
+	
+	            // Esperar os 30 segundos
+	            for (int i = 1; i <= 5; i++) {
+	                waitFor(5);
+	                //System.out.println("Passaram " + (i * 5) + " segundos.");
+	                out.write("Passaram " + (i * 5) + " segundos.");
+	                out.newLine();
+	                out.flush();
+	            }
+	            // Parar a thread do lobby porque o tempo acabou
+	            out.write("Time is up! Champion select ended.");
+	            out.newLine();
+	            out.flush();
+	            lobby.interrupt();
+	            System.out.println("\nWorker-" + id + " > LOBBY STOPPED.");
+	
+	            // Ver se todos os jogadores escolheram
+	            if (activePlay.allChampionsPicked()) {
+	                System.out.println("\nWorker-" + id + " > Players selected champions!");
+	                out.write("Jogando...");
+	                out.newLine();
+	                out.flush();
+	                if (activePlay.didTeam1Win()) {
+	                    out.write("Ganhou a EQUIPA 1!");
+	                    out.newLine();
+	                    out.flush();
+	                    
+	                    if (activePlay.isPlayerInTeam1(this.loggedUser)) {
+	                    	this.server.increasePlayerRanking(this.loggedUser);
+	                    }
+	                    
+	                    out.write("O seu novo ranking é: " + this.server.getPlayerRanking(this.loggedUser));
+	                    out.newLine();
+	                    out.flush();
+	                } else {
+	                    out.write("Ganhou a EQUIPA 2!");
+	                    out.newLine();
+	                    out.flush();
+	                    
+	                    if (!activePlay.isPlayerInTeam1(this.loggedUser)) {
+	                    	this.server.increasePlayerRanking(this.loggedUser);
+	                    }
+	                    
+	                    out.write("O seu novo ranking é: " + this.server.getPlayerRanking(this.loggedUser));
+	                    out.newLine();
+	                    out.flush();
+	                }
+	            } else {
+	                System.out.println("\nWorker-" + id + " > Champion selection failed!");
+	                out.write("Alguém não escolheu o seu campeão. Até já!");
+	                out.newLine();
+	                out.flush();
+	            }
+	            
+	            // Active play ended
+	            this.activePlay = null;
+	
+	            System.out.println("\nWorker-" + id + " > Asking if player wants to retry!");
+	            out.write("Please enter \"quit\" to stop playing, anything else to retry.");
+	            out.newLine();
+	            out.flush();
+	            
+	            String line = in.readLine();
+	            
+	            System.out.println("\nWorker-" + id + " > User replied: " + line);
+	            
+	            if (line != "quit") {
+	            	keepPlaying = true;
+	            } else {
+	            	keepPlaying = false;
+	            }
             }
-            // Parar a thread do lobby porque o tempo acabou
-            out.write("Terminou o tempo!");
-            out.newLine();
-            out.flush();
-            lobby.interrupt();
-            System.out.println("\nWorker-" + id + " > LOBBY STOPPED.");
 
-            // Ver se todos os jogadores escolheram
-            if (activePlay.allChampionsPicked()) {
-                System.out.println("\nWorker-" + id + " > Players selected champions!");
-                out.write("Jogando...");
-                out.newLine();
-                out.flush();
-                if (activePlay.didTeam1Win()) {
-                    out.write("Ganhou a EQUIPA 1!");
-                    out.newLine();
-                    out.flush();
-                    
-                    if (activePlay.isPlayerInTeam1(this.loggedUser)) {
-                    	this.server.increasePlayerRanking(this.loggedUser);
-                    }
-                    
-                    out.write("O seu novo ranking é: " + this.server.getPlayerRanking(this.loggedUser));
-                    out.newLine();
-                    out.flush();
-                } else {
-                    out.write("Ganhou a EQUIPA 2!");
-                    out.newLine();
-                    out.flush();
-                    
-                    if (!activePlay.isPlayerInTeam1(this.loggedUser)) {
-                    	this.server.increasePlayerRanking(this.loggedUser);
-                    }
-                    
-                    out.write("O seu novo ranking é: " + this.server.getPlayerRanking(this.loggedUser));
-                    out.newLine();
-                    out.flush();
-                }
-            } else {
-                System.out.println("\nWorker-" + id + " > Champions selection failed!");
-                out.write("Alguém não escolheu o seu campeão. Até já!");
-                out.newLine();
-                out.flush();
-            }
-
-            System.out.println("\nWorker-" + id + " > ASKED TO QUIT!");
-            out.write("Escreva quit para sair.");
-            out.newLine();
-            out.flush();
-
-            System.out.println("\nWorker-" + id + " > Client disconnected. Connection is closed.\n");
+            System.out.println("\nWorker-" + id + " > Client disconnected. Connection is closed.");
 
             //fechar sockets
             socket.shutdownOutput();

@@ -25,6 +25,7 @@ public class Play {
     private int ranking;
     private int players;
     private boolean team1Wins;
+    private int maxPlayers;
 
     public Play(int rank) {
         team1 = new HashMap<>();
@@ -32,6 +33,7 @@ public class Play {
         clients = new HashMap<>();
         ranking = rank;
         players = 0;
+        maxPlayers = 2;
     }
 
     public synchronized int getRanking() {
@@ -84,7 +86,7 @@ public class Play {
 
     public synchronized boolean isPlayFull() {
 
-        return (players >= 10);
+        return (players >= this.maxPlayers);
     }
 
     public synchronized int getPlayers() {

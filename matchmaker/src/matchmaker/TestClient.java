@@ -10,6 +10,8 @@ import java.net.UnknownHostException;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.ThreadLocalRandom;
 
+// Cliente de teste - conecta-se ao servidor, faz login,
+// e pede sempre para jogar, com alguns sleeps pelo meio.
 public class TestClient implements Runnable {
 
     private String hostname;
@@ -71,16 +73,17 @@ public class TestClient implements Runnable {
 	        out.newLine();
 	        out.flush();
 	        
-	        response = in.readLine();
-	        
-	        // Esperar por mensagem a dizer "Selecione o seu jogador (de 1 a 30). Tem 30 segundos para o fazer!"
-	        
-	        // Para testar, vamos escolher um jogador aleatório durante 20 segundos
-	        
-	        int changes = 0;
-	        
-	        while (changes < 20) {
+	        while (true) {
+
+		        // Escolher champions random para sempre
 	        	
+		        // Primeiro tentei escolher champions random até a lobby acabar,
+		        // e depois enviar "1" para responder ao "retry?", mas fazer o readLine()
+		        // para verificar se foi perguntado o "retry?" não combina com o loop 
+	        	// porque tínhamos de esvaziar o buffer à procura dessa mensagem,
+	        	// o que é impossível porque o buffer não esvazia, bloqueia a thread.
+	        	// A alternativa era criar uma thread para ler o buffer, mas isso é overkill.
+
 	        	out.write(String.valueOf(ThreadLocalRandom.current().nextInt(1, 30 + 1)));
 	        	out.newLine();
 	        	out.flush();
