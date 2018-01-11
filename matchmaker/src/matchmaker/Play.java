@@ -17,10 +17,10 @@ import java.util.Random;
  */
 public class Play {
 
-    // O arraylist guarda o user e o boneco que o mesmo escolheu (boneco = 0 se ainda não escolheu)
-    private Map<User, Integer> team1 = null;
-    private Map<User, Integer> team2 = null;
-    private Map<User, BufferedWriter> clients = null; // utilizador associado ao seu out do server para ele
+    // O arraylist guarda o username e o boneco que o mesmo escolheu (boneco = 0 se ainda não escolheu)
+    private Map<String, Integer> team1 = null;
+    private Map<String, Integer> team2 = null;
+    private Map<String, BufferedWriter> clients = null; // utilizador associado ao seu out do server para ele
     // talvez insira array para guarder selecionadas
     private int ranking;
     private int players;
@@ -56,9 +56,16 @@ public class Play {
 
         return team1Wins;
     }
+    
+    // Used to know if a player should rank up, together with didTeam1Win()
+    public synchronized boolean isPlayerInTeam1(String username) {
+    	return this.team1.containsKey(username);
+    	
+    	// Could check whether player is also on team 2, and throw error if not
+    }
 
     // disabled for testing purposes
-    public synchronized void addPlayer(User player) {
+    public synchronized void addPlayer(String player) {
 
         if (team1.size() < 5) {
 
@@ -71,7 +78,8 @@ public class Play {
         }
 
         players++;
-
+        
+        this.notifyAll(); // Notify all ServerWorkers waiting for the play to fill up
     }
 
     public synchronized boolean isPlayFull() {
@@ -87,7 +95,7 @@ public class Play {
     /*
     * Updates the champion of a given player if that champion is not choosed already
      */
-    public synchronized boolean chooseChampion(User player, String selected) {
+    public synchronized boolean chooseChampion(String player, String selected) {
 
         Integer selectedChampion = new Integer(selected);
 
@@ -148,7 +156,7 @@ public class Play {
 
     }
 
-    public synchronized boolean registerClientOut(User player, BufferedWriter writer) {
+    public synchronized boolean registerClientOut(String player, BufferedWriter writer) {
 
         if (!clients.containsKey(player)) {
             clients.put(player, writer);
@@ -161,10 +169,10 @@ public class Play {
     /*
     * Broadcast a certain message for the team of the user.
      */
-    public synchronized void teamcast(User userSender, String msg) {
-        msg = userSender.getUsername() + " escolheu o campeão " + msg;
-        for (User player : clients.keySet()) {
-            if (!player.getUsername().equals(userSender.getUsername()) // se não é o próprio utilizador
+    public synchronized void teamcast(String userSender, String msg) {
+        msg = userSender + " escolheu o campeão " + msg;
+        for (String player : clients.keySet()) {
+            if (!player.equals(userSender) // se não é o próprio utilizador
                     && // se são da mesma equipa 1
                     ((team1.containsKey(userSender) && team1.containsKey(player))
                     || // se são da mesma equipa
@@ -185,7 +193,7 @@ public class Play {
     * Broadcast a certain message for the team of the user.
      */
     public synchronized void broadcast(String msg) {
-        for (User player : clients.keySet()) {
+        for (String player : clients.keySet()) {
             try {
                 BufferedWriter bw = clients.get(player);
                 bw.write(msg);
@@ -196,24 +204,4 @@ public class Play {
             }
         }
     }
-
-    // Update rankings according to the winning team
-    public synchronized void rankingUpdate(User player, int team) {
-
-        if (team == 1) { // equipa vencedora foi a 1
-            if (team1.containsKey(player)) { // player faz parte da vencedora
-                player.increaseRanking();
-            } else { // faz parte da perdedora
-                player.decreaseRanking();
-            }
-        } else { // equipa vencedora foi a 2
-            if (team2.containsKey(player)) {
-                player.increaseRanking();
-            } else {
-                player.decreaseRanking();
-            }
-        }
-
-    }
-
 }

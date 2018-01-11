@@ -18,10 +18,10 @@ public class ChampionsLobby implements Runnable {
     int id;
     BufferedReader in = null;
     BufferedWriter out = null;
-    User loggedUser = null;
+    String loggedUser = null; // Username of logged user
     Play activePlay = null;
 
-    public ChampionsLobby(int workerId, BufferedReader input, BufferedWriter output, User user, Play play) {
+    public ChampionsLobby(int workerId, BufferedReader input, BufferedWriter output, String user, Play play) {
 
         id = workerId;
         in = input;
@@ -44,19 +44,19 @@ public class ChampionsLobby implements Runnable {
                 if (isNumber(line) && (Integer.parseInt(line) > 0) && (Integer.parseInt(line) < 31)) {
                     if (activePlay.chooseChampion(loggedUser, line)) { // já mete o campeão associado ao player
                         activePlay.teamcast(loggedUser, line); // diz à equipa que aquele jogador escolheu aquele campeao
-                        System.out.println("Worker-" + id + " > Player " + loggedUser.getUsername() + " choosed champion: " + line);
+                        System.out.println("Worker-" + id + " > Player " + loggedUser + " choosed champion: " + line);
                         System.out.println("Worker-" + id + " > Teamcasted with: " + line);
                         out.write("Campeão selecionado! Caso queira mudar, basta inserir outro número.");
                         out.newLine();
                         out.flush();
                     } else {
-                        System.out.println("\nWorker-" + id + " > Informed UNAVAILABLE CHAMPION to: " + loggedUser.getUsername());
+                        System.out.println("\nWorker-" + id + " > Informed UNAVAILABLE CHAMPION to: " + loggedUser);
                         out.write("Campeão indisponível! Escolha outro.");
                         out.newLine();
                         out.flush();
                     }
                 } else {
-                    System.out.println("\nWorker-" + id + " > Informed INVALID CHAMPION to: " + loggedUser.getUsername());
+                    System.out.println("\nWorker-" + id + " > Informed INVALID CHAMPION to: " + loggedUser);
                     out.write("Esse campeão ainda não nasceu! Escolha outro.");
                     out.newLine();
                     out.flush();

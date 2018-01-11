@@ -74,6 +74,23 @@ public class Server {
     	
     	return false;
     }
+    
+    public synchronized int getPlayerRanking(String username) {
+    	
+    	return this.users.get(username).getRanking();
+    }
+    
+    public synchronized void setPlayerRanking(String username, int ranking) {
+    	this.users.get(username).setRanking(ranking);
+    }
+
+    public synchronized void increasePlayerRanking(String username) {
+    	this.users.get(username).increaseRanking();
+    }
+    
+    public synchronized void decreasePlayerRanking(String username) {
+    	this.users.get(username).decreaseRanking();
+    }
 
     public static void main(String[] args) {
     	
@@ -126,10 +143,9 @@ public class Server {
         Runnable test = () -> {
 
 	    	// Testar com todos os users
-		
-			// Esperar que o servidor ligue
+			
 			try {
-				TimeUnit.SECONDS.sleep(2);
+				TimeUnit.SECONDS.sleep(2); // Esperar que o servidor ligue
 			} catch (InterruptedException e) {
 				e.printStackTrace();
 			}
@@ -148,7 +164,7 @@ public class Server {
 	        }
         };
         
-        new Thread(test).start();
-        s.startServer();
+        new Thread(test).start(); // Start test runnable which generates TestClients
+        s.startServer();          // Listen for client connections
     }
 }

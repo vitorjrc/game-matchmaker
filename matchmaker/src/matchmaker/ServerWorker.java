@@ -7,9 +7,7 @@ import java.io.InputStreamReader;
 import java.io.OutputStreamWriter;
 import static java.lang.Thread.sleep;
 import java.net.Socket;
-import java.util.HashMap;
 import java.util.concurrent.Callable;
-import java.util.concurrent.locks.ReentrantLock;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -18,7 +16,7 @@ public class ServerWorker implements Runnable {
     private Socket socket;
     private int id;
     private Game game = null; // podia ser lol, FM, cs:go
-    private User loggedUser = null;
+    private String loggedUser = null;
     private Play activePlay = null;
     private Server server;
 
@@ -62,22 +60,26 @@ public class ServerWorker implements Runnable {
             arrangePlay(loggedUser, out);
 
             // Informar login para o username X, jogo em que entrou e dizer para se preparar para escolher
-            out.write("Login efetuado, " + loggedUser.getUsername() + ".");
+            out.write("Login efetuado, " + loggedUser + ".");
             out.newLine();
             out.write("Entrou numa partida de ranking: " + Integer.toString(activePlay.getRanking()) + ".");
             out.newLine();
             out.write("A sua partida começa dentro de momentos. Aguarde...");
             out.newLine();
             out.flush();
-            System.out.println("\nWorker-" + id + " > Informed login to user: " + loggedUser.getUsername()
+            System.out.println("\nWorker-" + id + " > Informed login to user: " + loggedUser
                     + ", playing in game ranked: " + Integer.toString(activePlay.getRanking()));
             // FIM DE PREPARAÇÃO DE PARTIDA NOVA
 
             // Esperar que play esteja cheia
-            // TODO -> tentar eliminar esta espera ativa
-            while (!activePlay.isPlayFull()) {
-                // System.out.println("\nWorker-" + id + " > Informed user  " + loggedUser.getUsername() + " WAITING");
+            synchronized(activePlay) {
+            	
+            	while (!activePlay.isPlayFull()) {
+            		activePlay.wait();
+            	}
             }
+            
+            System.out.println("\nWorker-" + id + " > Play which user " + loggedUser + " is in has filled up and is about to start.");
 
             // Informar ao jogador que pode escolher o seu campeão
             System.out.println("Worker-" + id + " > ASKED to CHOOSE CHAMPION.");
@@ -115,16 +117,24 @@ public class ServerWorker implements Runnable {
                     out.write("Ganhou a EQUIPA 1!");
                     out.newLine();
                     out.flush();
-                    activePlay.rankingUpdate(loggedUser, 1);
-                    out.write("O seu novo ranking é: " + loggedUser.getRanking());
+                    
+                    if (activePlay.isPlayerInTeam1(this.loggedUser)) {
+                    	this.server.increasePlayerRanking(this.loggedUser);
+                    }
+                    
+                    out.write("O seu novo ranking é: " + this.server.getPlayerRanking(this.loggedUser));
                     out.newLine();
                     out.flush();
                 } else {
                     out.write("Ganhou a EQUIPA 2!");
                     out.newLine();
                     out.flush();
-                    activePlay.rankingUpdate(loggedUser, 2);
-                    out.write("O seu novo ranking é: " + loggedUser.getRanking());
+                    
+                    if (!activePlay.isPlayerInTeam1(this.loggedUser)) {
+                    	this.server.increasePlayerRanking(this.loggedUser);
+                    }
+                    
+                    out.write("O seu novo ranking é: " + this.server.getPlayerRanking(this.loggedUser));
                     out.newLine();
                     out.flush();
                 }
@@ -179,11 +189,7 @@ public class ServerWorker implements Runnable {
                 // Confirma password e informa entrada
                 if (((password = in.readLine()) != null) && this.server.login(username, password)) {
 
-                    // TODO - Não podemos guardar referência a User, tem de ser String do username
-                    // Isto pode causar problemas de concorrência, uma vez que estamos a colocar a informação
-                    // sobre se o utilizador está logado ou não em mais que um sítio (só devia estar no Server, this.server)
-                    // No entanto acho que não está a causar problemas neste momento.
-                    loggedUser = new User(username, password); // User fica logado na thread
+                    loggedUser = username;
 
                     System.out.println("\nWorker-" + id + " > Received message from client: " + password);
                     out.write("LOGIN BEM SUCEDIDO");
@@ -257,9 +263,9 @@ public class ServerWorker implements Runnable {
 
     }
 
-    private void arrangePlay(User player, BufferedWriter out) {
+    private void arrangePlay(String player, BufferedWriter out) {
 
-        int rank = game.isPlayAvailable(player.getRanking());
+        int rank = game.isPlayAvailable(this.server.getPlayerRanking(player));
 
         // isPlayStarted retorna -1 caso não haja uma play disponível, ou o valor do rank da play disponível
         if (rank >= 0) {
@@ -280,7 +286,7 @@ public class ServerWorker implements Runnable {
         } // criar novo jogo com ranking do primeiro jogador e adicionar o jogador à play. Fazer o jogo available para outros jogadores. activePlay é essa.
         else {
 
-            activePlay = new Play(player.getRanking());
+            activePlay = new Play(this.server.getPlayerRanking(player));
             activePlay.winningTeamRandom(); // definir equipa vencedora por random
             // disabled for testing purposes
             activePlay.addPlayer(loggedUser);
@@ -289,22 +295,6 @@ public class ServerWorker implements Runnable {
             System.out.println("Worker-" + id + " created a NEW PLAY.");
             System.out.println("Worker-" + id + " num of players: " + activePlay.getPlayers());
         }
-    }
-
-    /*
-    * Check if the input is readable by the parseInt. If not, we just return false so the system will not fail
-     */
-    private boolean isNumber(String line) {
-
-        boolean amIValid = false;
-
-        try {
-            Integer.parseInt(line);
-            amIValid = true;
-        } catch (NumberFormatException e) {
-        }
-
-        return amIValid;
     }
 
     private void waitFor(int i) throws InterruptedException {

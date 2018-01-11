@@ -28,6 +28,10 @@ public class User {
     public int getRanking() {
         return ranking;
     }
+    
+    public void setRanking(int ranking) {
+    	this.ranking = ranking;
+    }
 
     public void increaseRanking() {
         if (ranking < 9) {
