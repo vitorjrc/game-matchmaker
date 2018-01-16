@@ -296,8 +296,14 @@ public class ServerWorker implements Runnable {
             if (activePlay.isPlayFull()) {
 
                 game.startPlay(activePlay); // tira a play actual das availables e dá como iniciada a mesma
-                System.out.println("Worker-" + id + " made ACTIVE PLAY an EXHISTANT one.");
-
+                System.out.println("Worker-" + id + " Finished filling a play and started it.");
+                
+                
+                // Verificar concorrência
+                
+                System.out.println("Worker-" + id + " is ensuring play integrity.");
+                
+                game.ensureConcurrency(this.activePlay);
             }
 
             System.out.println("Worker-" + id + " num of players: " + activePlay.getPlayers());
@@ -312,9 +318,6 @@ public class ServerWorker implements Runnable {
             game.launchNewPlay(activePlay.getRanking(), activePlay);
             System.out.println("Worker-" + id + " created a NEW PLAY.");
             System.out.println("Worker-" + id + " num of players: " + activePlay.getPlayers());
-            
-            // Verificar concorrência
-            game.ensureConcurrency(this.activePlay);
         }
     }
 
