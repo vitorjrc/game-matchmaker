@@ -312,6 +312,9 @@ public class ServerWorker implements Runnable {
             game.launchNewPlay(activePlay.getRanking(), activePlay);
             System.out.println("Worker-" + id + " created a NEW PLAY.");
             System.out.println("Worker-" + id + " num of players: " + activePlay.getPlayers());
+            
+            // Verificar concorrência
+            game.ensureConcurrency(this.activePlay);
         }
     }
 

@@ -33,12 +33,20 @@ public class Play {
         clients = new HashMap<>();
         ranking = rank;
         players = 0;
-        maxPlayers = 2;
+        maxPlayers = 10;
     }
 
     public synchronized int getRanking() {
 
         return ranking;
+    }
+    
+    public int getMaxPlayers() {
+    	return this.maxPlayers;
+    }
+    
+    public synchronized int getNumPlayers() {
+    	return this.players;
     }
 
     public synchronized void winningTeamRandom() {

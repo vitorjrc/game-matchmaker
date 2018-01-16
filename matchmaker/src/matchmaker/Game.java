@@ -68,4 +68,52 @@ public class Game {
 
         plays.remove(rank);
     }
+    
+    public void ensureConcurrency(Play play) {
+    	
+    	this.checkRepeatedChampions(play);
+    	
+    	// Não relacionados a concorrência mas importantes na mesma
+    	this.checkPlayerRankings(play); 
+    	this.checkPlayerNumber(play);
+    }
+    
+    private void checkRepeatedChampions(Play play) {
+    	
+    	boolean repeatedChampion = false;
+    	
+    	// TODO
+    	// Este método verifica que não há jogadores na play com champions repetidos
+    	// Só é preciso preencher o método, ServerWorker já chama ensureConcurrency()
+    	// Se houver faz isto:
+    	
+    	if (repeatedChampion) {
+    		
+    		System.out.println("\nAyayayaya hay uns championes repetidios! madre nos tenga! \nay\nay\nay\nay\nay\n");
+    	}
+    	
+    }
+    
+    private void checkPlayerRankings(Play play) {
+    	
+    	boolean nonCompatibleRanking = false;
+    	
+    	// TODO
+    	// Este método verifica que os jogadores da play não têm diferença de rankings > 1 entre si
+    	// Só é preciso preencher o método, ServerWorker já chama ensureConcurrency()
+    	// Se houver faz isto:
+    	
+    	if (nonCompatibleRanking) {
+    		
+    		System.out.println("\nAyayayaya hay un ranking no compatible! que hacemos hombre! \nay\nay\nay\nay\nay\n");
+    	}
+    }
+    
+    private void checkPlayerNumber(Play play) {
+    	
+    	if (play.getMaxPlayers() != play.getNumPlayers()) {
+    		
+    		System.out.println("\nAyayayaya lo jumero de hogadores! lo maximum eres " + String.valueOf(play.getMaxPlayers()) + " pero hay " + String.valueOf(play.getNumPlayers()) + "! \nay\nay\nay\nay\nay\n");
+    	}
+    }
 }
