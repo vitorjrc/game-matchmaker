@@ -1,6 +1,8 @@
 package matchmaker;
 
 import java.util.HashMap;
+import java.util.HashSet;
+import java.util.Set;
 
 /**
  *
@@ -79,18 +81,39 @@ public class Game {
     }
     
     private void checkRepeatedChampions(Play play) {
-    	
-    	boolean repeatedChampion = false;
-    	
-    	// TODO
+        // TODO
     	// Este método verifica que não há jogadores na play com champions repetidos
     	// Só é preciso preencher o método, ServerWorker já chama ensureConcurrency()
     	// Se houver faz isto:
     	
-    	if (repeatedChampion) {
+    	Set<Integer> champions = new HashSet<Integer>();
+    	boolean repeatedChampion = false;
+        
+        synchronized(play){
+            
+            for(Integer i : play.getTeam1().values()){
+                System.out.println(i);
+                // 0 quer dizer que n escolheu champion ainda e só queremos verificar se alguém tem champs repetidos
+                 if(i!=0 && !champions.add(i)){
+                     repeatedChampion = true;
+                 }
+            }
+           
+            champions.clear();
+          
+            for(Integer i : play.getTeam2().values()){
+                if (i!=0 && !champions.add(i)){
+                    repeatedChampion = true;
+                }
+            }
+            
+           
+            if (repeatedChampion) {
     		
     		System.out.println("\nAyayayaya hay uns championes repetidios! madre nos tenga! \nay\nay\nay\nay\nay\n");
-    	}
+            }
+        
+        }
     	
     }
     

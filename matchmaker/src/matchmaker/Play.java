@@ -45,6 +45,14 @@ public class Play {
     	return this.maxPlayers;
     }
     
+    public  Map<String, Integer> getTeam1(){
+        return this.team1;
+    }
+    
+    public  Map<String, Integer> getTeam2(){
+        return this.team2;
+    }
+    
     public synchronized int getNumPlayers() {
     	return this.players;
     }
