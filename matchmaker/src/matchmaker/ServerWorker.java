@@ -61,6 +61,8 @@ public class ServerWorker implements Runnable {
             	// -----------------------------------------------------------------
 	            // Inserir o jogador numa partida e dar a conhecer o seu BufferedWriter para as mensagens em team no lobby de seleção
 	            System.out.println("\nWorker-" + id + " > ARRANGING PLAY");
+	            
+	            // Arrange play
 	            arrangePlay(loggedUser, out);
 	
 	            // Informar login para o username X, jogo em que entrou e dizer para se preparar para escolher
@@ -148,6 +150,11 @@ public class ServerWorker implements Runnable {
 	                out.newLine();
 	                out.flush();
 	            }
+	            
+	            // Verificar concorrência
+                System.out.println("Worker-" + id + " is ensuring play integrity.");
+                
+                this.activePlay.ensureConcurrency();
 	            
 	            // Active play ended
 	            this.activePlay = null;
@@ -297,13 +304,6 @@ public class ServerWorker implements Runnable {
 
                 game.startPlay(activePlay); // tira a play actual das availables e dá como iniciada a mesma
                 System.out.println("Worker-" + id + " Finished filling a play and started it.");
-                
-                
-                // Verificar concorrência
-                
-                System.out.println("Worker-" + id + " is ensuring play integrity.");
-                
-                game.ensureConcurrency(this.activePlay);
             }
 
             System.out.println("Worker-" + id + " num of players: " + activePlay.getPlayers());

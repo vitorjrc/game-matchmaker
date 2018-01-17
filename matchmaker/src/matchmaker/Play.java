@@ -8,8 +8,10 @@ package matchmaker;
 import java.io.BufferedWriter;
 import java.io.IOException;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Map;
 import java.util.Random;
+import java.util.Set;
 
 /**
  *
@@ -26,6 +28,7 @@ public class Play {
     private int players;
     private boolean team1Wins;
     private int maxPlayers;
+    private boolean concurrencyVerified; // Usada no fim do jogo para verificar concorrência apenas uma vez
 
     public Play(int rank) {
         team1 = new HashMap<>();
@@ -34,6 +37,8 @@ public class Play {
         ranking = rank;
         players = 0;
         maxPlayers = 10;
+        
+        this.concurrencyVerified = false;
     }
 
     public synchronized int getRanking() {
@@ -222,4 +227,94 @@ public class Play {
             }
         }
     }
+    
+    
+    // Testing methods
+    
+    public void ensureConcurrency() {
+    	
+    	// Verificar apenas uma vez (todos os jogadores vão tentar verificar a play)
+    	synchronized(this) {
+    		
+    		if (!this.concurrencyVerified) {
+    			this.concurrencyVerified = true;
+    		} else {
+    			return;
+    		}
+     	}
+    	
+    	this.checkRepeatedChampions();
+    	
+    	// Não relacionados a concorrência mas importantes na mesma
+    	this.checkPlayerRankings(); 
+    	this.checkPlayerNumber();
+    }
+    
+    private void checkRepeatedChampions() {
+    	
+    	Play play = this;
+    	
+        // TODO
+    	// Este método verifica que não há jogadores na play com champions repetidos
+    	// Só é preciso preencher o método, ServerWorker já chama ensureConcurrency()
+    	// Se houver faz isto:
+    	
+    	Set<Integer> champions = new HashSet<Integer>();
+    	boolean repeatedChampion = false;
+        
+        synchronized(play){
+            
+            for(Integer i : play.getTeam1().values()){
+                System.out.println(i);
+                // 0 quer dizer que n escolheu champion ainda e só queremos verificar se alguém tem champs repetidos
+                 if(i!=0 && !champions.add(i)){
+                     repeatedChampion = true;
+                 }
+            }
+           
+            champions.clear();
+          
+            for(Integer i : play.getTeam2().values()){
+                if (i!=0 && !champions.add(i)){
+                    repeatedChampion = true;
+                }
+            }
+            
+           
+            if (repeatedChampion) {
+    		
+    		System.out.println("\nAyayayaya hay uns championes repetidios! madre nos tenga! \nay\nay\nay\nay\nay\n");
+            }
+        
+        }
+    	
+    }
+    
+    private void checkPlayerRankings() {
+    	
+    	Play play = this;
+    	
+    	boolean nonCompatibleRanking = false;
+    	
+    	// TODO
+    	// Este método verifica que os jogadores da play não têm diferença de rankings > 1 entre si
+    	// Só é preciso preencher o método, ServerWorker já chama ensureConcurrency()
+    	// Se houver faz isto:
+    	
+    	if (nonCompatibleRanking) {
+    		
+    		System.out.println("\nAyayayaya hay un ranking no compatible! que hacemos hombre! \nay\nay\nay\nay\nay\n");
+    	}
+    }
+    
+    private void checkPlayerNumber() {
+    	
+    	Play play = this;
+    	
+    	if (play.getMaxPlayers() != play.getNumPlayers()) {
+    		
+    		System.out.println("\nAyayayaya lo jumero de hogadores! lo maximum eres " + String.valueOf(play.getMaxPlayers()) + " pero hay " + String.valueOf(play.getNumPlayers()) + "! \nay\nay\nay\nay\nay\n");
+    	}
+    }
+    
 }
