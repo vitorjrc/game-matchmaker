@@ -231,7 +231,7 @@ public class Play {
     
     // Testing methods
     
-    public void ensureConcurrency() {
+    public void ensureConcurrency(Server server) {
     	
     	// Verificar apenas uma vez (todos os jogadores vão tentar verificar a play)
     	synchronized(this) {
@@ -246,7 +246,7 @@ public class Play {
     	this.checkRepeatedChampions();
     	
     	// Não relacionados a concorrência mas importantes na mesma
-    	this.checkPlayerRankings(); 
+    	this.checkPlayerRankings(server); 
     	this.checkPlayerNumber();
     }
     
@@ -290,16 +290,27 @@ public class Play {
     	
     }
     
-    private void checkPlayerRankings() {
+    private void checkPlayerRankings(Server server) {
     	
     	Play play = this;
     	
     	boolean nonCompatibleRanking = false;
     	
-    	// TODO
-    	// Este método verifica que os jogadores da play não têm diferença de rankings > 1 entre si
-    	// Só é preciso preencher o método, ServerWorker já chama ensureConcurrency()
-    	// Se houver faz isto:
+    	int firstRank = -1;
+    	
+    	for (String username : play.getTeam1().keySet()) {
+    		
+    		int rank = server.getPlayerRanking(username);
+    		
+    		if (firstRank == -1) {
+    			
+    			firstRank = rank;
+    		
+    		} else if (Math.abs(firstRank - rank) > 1) {
+    		
+    			nonCompatibleRanking = true;
+    		}
+    	}
     	
     	if (nonCompatibleRanking) {
     		

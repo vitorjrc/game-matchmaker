@@ -154,7 +154,7 @@ public class ServerWorker implements Runnable {
 	            // Verificar concorrência
                 System.out.println("Worker-" + id + " is ensuring play integrity.");
                 
-                this.activePlay.ensureConcurrency();
+                this.activePlay.ensureConcurrency(this.server);
 	            
 	            // Active play ended
 	            this.activePlay = null;
